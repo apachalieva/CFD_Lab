@@ -3,24 +3,37 @@
 #include "helper.h"
 
 int readParameters(int *xlength, double *tau, double *velocityWall, int *timesteps, int *timestepsPerPlotting, int argc, char *argv[]){
-    char *szFileName="cavity100.dat";
-    if(argc==2) szFileName=argv[1];
-    else ERROR("No parameter file specified");
 
-    /* reading from the specified file */
-    read_int(szFileName,"xlength",xlength);
-    read_double(szFileName,"tau",tau);
-    read_double(szFileName,"velocityWall",velocityWall);
-    read_double(szFileName,"velocityWall",velocityWall+1);
-    read_double(szFileName,"velocityWall",velocityWall+2);
-    read_int(szFileName,"timesteps",timesteps);
-    read_int(szFileName,"timestepsPerPlotting",timestepsPerPlotting);
-
-  return 1;
+    double *velocityWall_0;
+    double *velocityWall_1;
+    double *velocityWall_2;
+    char *szFileName;
+    /*
+    int i;
+    */
+    if( argc == 2 )
+    {
+      szFileName = argv[ 1 ];
+    }
+    else
+    {
+      printf( "WARRNING: No data-file given. Use the lbm_file.dat as default.\n" );
+      szFileName = "lbm_file.dat";
+    }
+    read_int( szFileName, "xlength", xlength );
+    read_int( szFileName, "timesteps", timesteps );
+    read_int( szFileName, "timestepsPerPlotting", timestepsPerPlotting );
+    
+    read_double( szFileName, "tau", tau );
+    velocityWall_0 = &velocityWall[ 0 ];
+    velocityWall_1 = &velocityWall[ 1 ];
+    velocityWall_2 = &velocityWall[ 2 ];
+    read_double( szFileName, "velocityWall_0", velocityWall_0 );
+    read_double( szFileName, "velocityWall_1", velocityWall_1 );
+    read_double( szFileName, "velocityWall_2", velocityWall_2 );
+    
+    return 1;
 }
-
-
-
 
 void initialiseFields(double *collideField, double *streamField, int *flagField, int xlength){
 	unsigned long x, y, z, i, ix;
