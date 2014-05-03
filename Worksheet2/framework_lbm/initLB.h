@@ -2,6 +2,9 @@
 #define _INITLB_H_
 #include "helper.h"
 
+#define FLUID 0
+#define NO_SLIP 1
+#define MOVING_WALL 2
 
 /* reads the parameters for the lid driven cavity scenario from a config file */
 int readParameters(

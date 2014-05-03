@@ -2,10 +2,6 @@
 #include "LBDefinitions.h"
 #include "helper.h"
 
-#define FLUID 0
-#define NO_SLIP 1
-#define MOVING_WALL 2
-
 int readParameters(int *xlength, double *tau, double *velocityWall, int *timesteps, int *timestepsPerPlotting, int argc, char *argv[]){
     char *szFileName="cavity100.dat";
     if(argc==2) szFileName=argv[1];
