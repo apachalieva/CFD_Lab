@@ -14,6 +14,10 @@
 #undef PI
 #endif
 
+#define DOTP(x, y) ((*((x)+0)) * (*((y)+0)) + (*((x)+1)) * (*((y)+1)) + (*((x)+2)) * (*((y)+2)))
+#define CUBE(x) ((x)*(x)*(x))
+#define SQ(x) ((x)*(x))
+
 #define FREE_ARG char*
 
 /**
