@@ -2,59 +2,219 @@
 #include "computeCellValues.h"
 #include "LBDefinitions.h"
 #include "helper.h"
+#include "initLB.h"
 
-void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, int xlength){
-  /* TODO Me */
-  
-  int x, y, z, i, j;
-  
-  double density, *currentCell;
-  int INV_LATTICEVELOCITIES[19][3];
-  
-  for( i = 0; i < Q; ++i ){
-    for( j = 0; j < DIM; ++j ){
-      if( LATTICEVELOCITIES[i][j] == 1 || LATTICEVELOCITIES[i][j] == -1 ){
-	INV_LATTICEVELOCITIES[i][j] = -LATTICEVELOCITIES[i][j];
-      }
-      else{
-	INV_LATTICEVELOCITIES[i][j] = 0;
-      }
-    }
-  }
-/* 
- * Printing the inverse velocities c_i
- */
-/*
-  for( i = 0lu; i < Q; ++i ){
-    printf( "inverse_c[%lu] = ", i );
-    for( j = 0lu; j < DIM; ++j ){
-      printf( "%d, ", inverse_c[i][j]  );
-    }
-   printf( "\n " );
-  }
-*/
 
-  for( z = 1; z < xlength + 1; ++z ){
-    for( y = 1; y < xlength + 1; ++y ){
-      for( x = 1; x < xlength + 1; ++x ){
-	 for( i = 0; i < Q; ++i ){
-	    
-	  currentCell = &collideField[ Q * ( x + (xlength+2) * y + SQ(xlength+2) * z ) + i ];
-	
-	  /* NO-SLIP = 1 boundary conditions */
-	  if( flagField[ x + (xlength+2) * y + SQ(xlength+2) * z ] == 1 ){
-	     *currentCell = collideField[ Q * ( ( x + INV_LATTICEVELOCITIES[i][0] ) + (xlength+2) * ( y + INV_LATTICEVELOCITIES[i][1] ) + SQ(xlength+2) * ( z + INV_LATTICEVELOCITIES[i][2] ) ) + i ];
-	     
-	  }
-	  else if( flagField[  x + (xlength+2) * y + SQ(xlength+2) * z  ] == 2 ){
-	     computeDensity( currentCell, &density );
-	     
-	     *currentCell = collideField[ Q * ( ( x + INV_LATTICEVELOCITIES[i][0] ) + (xlength+2) * ( y + INV_LATTICEVELOCITIES[i][1] ) + SQ(xlength+2) * ( z + INV_LATTICEVELOCITIES[i][2] ) ) + i ] 
-					+ 2 * LATTICEWEIGHTS[i] * density * ( LATTICEVELOCITIES[i][0]*wallVelocity[0]+LATTICEVELOCITIES[i][1]*wallVelocity[1]+LATTICEVELOCITIES[i][2]*wallVelocity[2])*3;
-	  } 
-	}
-      }
-    }
-  } 
+inline int inv_velocity(int i){
+	return Q-i-1;
 }
 
+inline int getCell(int x, int y, int z, int xlength){
+	 return Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
+}
+
+inline void treatCase(double *collideField, double* flagField, int x0, int x1, int y0, int y1, int z0, int z1, int const * const vel, int n, int xlenght, const double * const wallVelocity){
+	int x, y, z, i;
+	double density;
+
+	for(z=z0; z<=z1; z++)
+		for(y=y0; y<=y1; y++)
+			for(x=x0; x<=x1; x++)
+					for(i=0; i<n; i++){
+						collideField[getCell(x, y, z) + vel[i]] =
+								collideField[ getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
+														LATTICEVELOCITIES[vel[i]][1] + y,
+														LATTICEVELOCITIES[vel[i]][2] + z,
+														xlength)
+														+ inv_velocity(vel[i])
+											];
+
+
+						if(flagField[getCell(x, y, z)] == MOVING_WALL){
+							computeDensity(getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
+													LATTICEVELOCITIES[vel[i]][1] + y,
+													LATTICEVELOCITIES[vel[i]][2] + z,
+													xlength),
+											&density);
+
+							collideField[getCell(x, y, z) + vel[i]] += 2.0 * LATTICEWEIGHTS[vel[i]] * density * DOTP(LATTICEVELOCITIES[vel[i]], wallVelocity) / SQ(C_S);
+
+						}
+
+
+					}
+}
+
+
+void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, int xlength){
+
+	int x, y, z, vel[19];
+	double * currentCell;
+
+
+	/* z=0 boundary */
+
+	/* 			y=0 boundary */
+	vel[0] = 18;
+	treatCase(collideField, flagField, 1, xlenght, 0, 0, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			y=xlength+1 boundary */
+	vel[0] = 14;
+	treatCase(collideField, flagField, 1, xlenght, xlength+1, xlength+1, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			x=0 boundary */
+	vel[0] = 17;
+	treatCase(collideField, flagField, 0, 0, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			x=xlength+1 boundary */
+	vel[0] = 15;
+	treatCase(collideField, flagField, xlenght+1, xlenght+1, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 14;
+	vel[1] = 15;
+	vel[2] = 16;
+	vel[3] = 17;
+	vel[4] = 18;
+	treatCase(collideField, flagField, 1, xlenght, 1, xlength, 0, 0, vel, 5, xlength, wallVelocity );
+
+	/* z=xlength+1 boundary */
+
+	/* 			y=0 boundary */
+	vel[0] = 4;
+	treatCase(collideField, flagField, 1, xlenght, 0, 0, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			y=xlength+1 boundary */
+	vel[0] = 0;
+	treatCase(collideField, flagField, 1, xlenght, xlength+1, xlength+1, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			x=0 boundary */
+	vel[0] = 3;
+	treatCase(collideField, flagField, 0, 0, 1, xlenght, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			x=xlength+1 boundary */
+	vel[0] = 1;
+	treatCase(collideField, flagField, xlenght+1, xlenght+1, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 0;
+	vel[1] = 1;
+	vel[2] = 2;
+	vel[3] = 3;
+	vel[4] = 4;
+	treatCase(collideField, flagField, 1, xlenght, 1, xlength, xlength+1, xlength+1, vel, 5, xlength, wallVelocity );
+
+
+	/* x=0 boundary */
+
+	/* 			y=0 boundary */
+	vel[0] = 13;
+	treatCase(collideField, flagField, 0, 0, 0, 0, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			y=xlength+1 boundary */
+	vel[0] = 7;
+	treatCase(collideField, flagField, 0, 0, xlength+1, xlength+1, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			z=0 boundary */
+	vel[0] = 17;
+	treatCase(collideField, flagField, 0, 0, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			z=xlength+1 boundary */
+	vel[0] = 3;
+	treatCase(collideField, flagField, 0, 0, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 13;
+	vel[1] = 7;
+	vel[2] = 17;
+	vel[3] = 3;
+	vel[4] = 10;
+	treatCase(collideField, flagField, 0, 0, 1, xlength, 1, xlength, vel, 5, xlength, wallVelocity );
+
+
+
+	/* x=xlength+1 boundary */
+
+	/* 			y=0 boundary */
+	vel[0] = 11;
+	treatCase(collideField, flagField, xlength+1, xlength+1, 0, 0, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			y=xlength+1 boundary */
+	vel[0] = 5;
+	treatCase(collideField, flagField, xlength+1, xlength+1, xlength+1, xlength+1, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			z=0 boundary */
+	vel[0] = 15;
+	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			z=xlength+1 boundary */
+	vel[0] = 1;
+	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 11;
+	vel[1] = 5;
+	vel[2] = 15;
+	vel[3] = 1;
+	vel[4] = 8;
+	treatCase(collideField, flagField, 0, 0, 1, xlength, 1, xlength, vel, 5, xlength, wallVelocity );
+
+	/* y=0 boundary */
+
+	/* 			x=0 boundary */
+	vel[0] = 13;
+	treatCase(collideField, flagField, 0, 0, 0, 0, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			x=xlength+1 boundary */
+	vel[0] = 11;
+	treatCase(collideField, flagField, xlength+1, xlength+1, 0, 0, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			z=0 boundary */
+	vel[0] = 18;
+	treatCase(collideField, flagField, 1, xlength, 0, 0, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			z=xlength+1 boundary */
+	vel[0] = 4;
+	treatCase(collideField, flagField, 1, xlength, 0, 0, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 13;
+	vel[1] = 11;
+	vel[2] = 18;
+	vel[3] = 4;
+	vel[4] = 12;
+	treatCase(collideField, flagField, 1, xlength, 0, 0, 1, xlength, vel, 5, xlength, wallVelocity );
+
+	/* y=xlength+1 boundary */
+
+	/* 			x=0 boundary */
+	vel[0] = 7;
+	treatCase(collideField, flagField, 0, 0, xlength+1, xlength+1, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			x=xlength+1 boundary */
+	vel[0] = 5;
+	treatCase(collideField, flagField, xlength+1, xlength+1, xlength+1, xlength+1, 1, xlength, vel, 1, xlength, wallVelocity );
+
+	/* 			z=0 boundary */
+	vel[0] = 14;
+	treatCase(collideField, flagField, 1, xlength, xlength+1, xlength+1, 0, 0, vel, 1, xlength, wallVelocity );
+
+	/* 			z=xlength+1 boundary */
+	vel[0] = 0;
+	treatCase(collideField, flagField, 1, xlength, xlength+1, xlength+1, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+
+	/* 			inner face boundary */
+	vel[0] = 7;
+	vel[1] = 5;
+	vel[2] = 14;
+	vel[3] = 0;
+	vel[4] = 6;
+	treatCase(collideField, flagField, 1, xlength, 0, 0, 1, xlength, vel, 5, xlength, wallVelocity );
+
+
+
+
+
+
+
+}
