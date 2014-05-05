@@ -70,7 +70,7 @@ void writeVtkOutput(const double * const collideField, const int * const flagFie
 	for(z=1ul; z < xlength+1; z++)
 		for( y=1ul; y < xlength+1; y++)
 			for(x=1ul; x < xlength+1; x++){
-				double const * const currentCell = collideField + Q * (x + xlength * y + SQ(xlength) * z);
+				double const * const currentCell = collideField + Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 
 				computeDensity(currentCell, &density);
 				computeVelocity(currentCell, &density, velocity);
@@ -84,7 +84,7 @@ void writeVtkOutput(const double * const collideField, const int * const flagFie
 	for(z=2ul; z < xlength+1; z++)
 		for(y=2ul; y < xlength+1; y++)
 			for(x=2ul; x < xlength+1; x++){
-				double const * const currentCell = collideField + Q * (x + xlength * y + SQ(xlength) * z);
+				double const * const currentCell = collideField + Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 
 				computeDensity(currentCell, &density);
 				fprintf(fp, "%f\n", density );
