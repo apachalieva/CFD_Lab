@@ -6,11 +6,11 @@ SOURCES=initLB.c visualLB.c boundary.c collision.c streaming.c computeCellValues
 CC=gcc
 
 #CFLAGS=-Werror -pedantic -Wall -ggdb
-CFLAGS=-Wall -ggdb
+CFLAGS=-Wall -O3
 
 # Linker flags
 # ------------
-LDFLAGS= 
+LDFLAGS= -lm
 
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=lbsim
