@@ -4,7 +4,7 @@
 #include "helper.h"
 
 /*
- * This fucntion computes the post-collision distributions according to formula (13).
+ * This function computes the post-collision distributions according to formula (13).
  */
 void computePostCollisionDistributions(double *currentCell, const double * const tau, const double *const feq){
 	int i;
