@@ -5,14 +5,30 @@
 #include "initLB.h"
 
 
+/*  fast inverse velocity index calculation */
 inline int inv_velocity(int i){
 	return Q-i-1;
 }
 
+
+/*  returns a cell index */
 inline int getCell(int x, int y, int z, int xlength){
 	 return Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 }
 
+
+/**
+ * 
+ * function treatCase
+ * treats the boundary cells [x0 x1] x [y0 y1] x [z0 z1]  considering just the velocity indexes specified in the vector 'vel' of length 'n'
+ * the velocity indexes refer to the vector LATTICEVELOCITIES
+ * 
+ * 
+ * example 
+ * vel[0] = 18;
+ * treatCase(collideField, flagField, 1, xlength, 0, 0, 0, 0, vel, 1, xlength, wallVelocity );
+ * treats the z = y = 0 case, excluding the corner cells x = 0, x = xlength+1
+ * */
 inline void treatCase(double *collideField, int* flagField, int x0, int x1, int y0, int y1, int z0, int z1, int const * const vel, int n, int xlength, const double * const wallVelocity){
 	int x, y, z, i;
 	double density;
@@ -29,8 +45,11 @@ inline void treatCase(double *collideField, int* flagField, int x0, int x1, int 
 														+ inv_velocity(vel[i])
 											];
 
-
+						
 						if(flagField[x + (xlength+2) * y + SQ(xlength+2) * z] == MOVING_WALL){
+							
+							/* adding the acceleration term relative to the moving wall  */
+							
 							computeDensity(collideField+ getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
 													LATTICEVELOCITIES[vel[i]][1] + y,
 													LATTICEVELOCITIES[vel[i]][2] + z,
