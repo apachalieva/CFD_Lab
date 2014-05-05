@@ -41,7 +41,7 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
 	for(z=0ul; z < xlength+2; z++)
 		for(y=0ul; y < xlength+2; y++)
 			for(x=0ul; x < xlength+2; x++){
-				ix = x + xlength * y + SQ(xlength) * z;
+				ix = x + (xlength+2) * y + SQ(xlength+2) * z;
 
 				/* pdf intial condition */
 				for(i=0ul; i < Q; i++){
