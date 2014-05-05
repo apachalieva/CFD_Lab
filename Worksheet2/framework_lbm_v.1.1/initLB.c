@@ -2,23 +2,25 @@
 #include "LBDefinitions.h"
 #include "helper.h"
 
+/*
+ * Read the parameters - domainsize xlength, relaxation time tau, velocityWall, 
+ * number of time steps and interval between subsequent VTK outputs. 
+ */
 int readParameters(int *xlength, double *tau, double *velocityWall, int *timesteps, int *timestepsPerPlotting, int argc, char *argv[]){
 
     double *velocityWall_0;
     double *velocityWall_1;
     double *velocityWall_2;
     char *szFileName;
-    /*
-    int i;
-    */
+   
     if( argc == 2 )
     {
       szFileName = argv[ 1 ];
     }
     else
     {
-      printf( "WARRNING: No data-file given. Use the lbm_file.dat as default.\n" );
-      szFileName = "lbm_file.dat";
+      printf( "WARRNING: No data-file given. Use the cavity.dat as default.\n" );
+      szFileName = "cavity.dat";
     }
     read_int( szFileName, "xlength", xlength );
     read_int( szFileName, "timesteps", timesteps );
@@ -35,6 +37,11 @@ int readParameters(int *xlength, double *tau, double *velocityWall, int *timeste
     return 1;
 }
 
+/*
+ * Initialise the fields with velocity = 0 and density = 1
+ * The flagField stores information about the geometry: 
+ * FLUID = 0, NO_SLIP = 1, MOVING_WALL = 2  
+ */
 void initialiseFields(double *collideField, double *streamField, int *flagField, int xlength){
 	int x, y, z, i, ix;
 
