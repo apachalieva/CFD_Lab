@@ -36,11 +36,11 @@ int readParameters(int *xlength, double *tau, double *velocityWall, int *timeste
 }
 
 void initialiseFields(double *collideField, double *streamField, int *flagField, int xlength){
-	unsigned long x, y, z, i, ix;
+	int x, y, z, i, ix;
 
-	for(z=0ul; z < xlength+2; z++)
-		for(y=0ul; y < xlength+2; y++)
-			for(x=0ul; x < xlength+2; x++){
+	for(z=0; z < xlength+2; z++)
+		for(y=0; y < xlength+2; y++)
+			for(x=0; x < xlength+2; x++){
 				ix = x + (xlength+2) * y + SQ(xlength+2) * z;
 
 				/* pdf intial condition */
