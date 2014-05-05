@@ -3,6 +3,9 @@
 #include "computeCellValues.h"
 #include "helper.h"
 
+/*
+ * This fucntion computes the post-collision distributions according to formula (13).
+ */
 void computePostCollisionDistributions(double *currentCell, const double * const tau, const double *const feq){
 	int i;
 
@@ -10,6 +13,10 @@ void computePostCollisionDistributions(double *currentCell, const double * const
 		currentCell[i] = currentCell[i] + (feq[i] - currentCell[i]) / (*tau);
 }
 
+/*
+ * The Lattice-Boltzmann-Method is split in two steps - Collide and Streaming steps. 
+ * In this function the Collide step is implemented
+ */
 void doCollision(double *collideField, int *flagField,const double * const tau,int xlength){
 	double density, velocity[3], feq[Q], *currentCell;
 	int x, y, z;
