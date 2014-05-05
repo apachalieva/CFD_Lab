@@ -7,12 +7,13 @@
 #include "visualLB.h"
 #include "boundary.h"
 #include "LBDefinitions.h"
-
+#include <time.h>
 
 
 int main (int argc, char *argv[]){
 	double *collideField=NULL, *streamField=NULL, tau, velocityWall[3];
 	int t, xlength, timesteps, timestepsPerPlotting, *flagField=NULL;
+	clock_t start = clock();
 
 	readParameters( &xlength, &tau, velocityWall, &timesteps, &timestepsPerPlotting, argc, argv);
 	
@@ -48,6 +49,10 @@ int main (int argc, char *argv[]){
 
 
 	}
+	
+	
+	float seconds = (float)(clock() - start) / CLOCKS_PER_SEC;
+	printf("MLUPS %f\n", (float)(CUBE(xlength+2) / 1000000) / seconds);	
 	
 	
 	/* 
