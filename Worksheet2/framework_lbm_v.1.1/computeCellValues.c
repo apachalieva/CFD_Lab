@@ -2,6 +2,10 @@
 #include "LBDefinitions.h"
 #include "helper.h"
 
+/*
+ * Computes the density within the current cell (according to eq.(9)) 
+ * and stores the result into the density.
+ */
 void computeDensity(const double *const currentCell, double *density){
 	int i;
 
@@ -10,6 +14,10 @@ void computeDensity(const double *const currentCell, double *density){
 		*density = *density + currentCell[i];
 }
 
+/*
+ * Computes the velocity within the current cell (according to eq.(9)) 
+ * and stores the result into the velocity.
+ */
 void computeVelocity(const double * const currentCell, const double * const density, double *velocity){
 	int i, d;
 
@@ -24,6 +32,10 @@ void computeVelocity(const double * const currentCell, const double * const dens
 		velocity[d] /= (*density);
 }
 
+/*
+ * Computes the equilibrium distribution (according to eq.(10)) from the density and the velocity
+ * and stores the result into the feq.
+ */
 void computeFeq(const double * const density, const double * const velocity, double *feq){
 	unsigned long i;
 
