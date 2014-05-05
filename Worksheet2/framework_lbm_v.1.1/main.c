@@ -15,11 +15,19 @@ int main (int argc, char *argv[]){
 	int t, xlength, timesteps, timestepsPerPlotting, *flagField=NULL;
 
 	readParameters( &xlength, &tau, velocityWall, &timesteps, &timestepsPerPlotting, argc, argv);
-
+	
+	/* 
+	 * Allocate memory blocks: collideField, streamField and flagField
+	 */
 	collideField = malloc(Q * CUBE(xlength+2) * sizeof(double));
 	streamField  = malloc(Q * CUBE(xlength+2) * sizeof(double));
 	flagField    = malloc(    CUBE(xlength+2) * sizeof(double));
-
+	
+	/*
+	 * Initialise the fields with velocity = 0 and density = 1
+	 * The flagField stores information about the geometry: 
+	 * FLUID = 0, NO_SLIP = 1, MOVING_WALL = 2  
+	 */
 	initialiseFields(collideField, streamField, flagField, xlength);
 
 	for(t=0; t < timesteps; t++){
@@ -40,7 +48,15 @@ int main (int argc, char *argv[]){
 
 
 	}
-
+	
+	
+	/* 
+	 * Free the memory allocated with malloc() 
+	 */
+	free(collideField);
+	free(streamField);
+	free(flagField);
+	
 	return 0;
 }
 
