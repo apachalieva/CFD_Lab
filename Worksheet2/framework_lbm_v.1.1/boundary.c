@@ -30,7 +30,7 @@ inline void treatCase(double *collideField, int* flagField, int x0, int x1, int 
 											];
 
 
-						if(flagField[getCell(x, y, z, xlength)] == MOVING_WALL){
+						if(flagField[x + (xlength+2) * y + SQ(xlength+2) * z] == MOVING_WALL){
 							computeDensity(collideField+ getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
 													LATTICEVELOCITIES[vel[i]][1] + y,
 													LATTICEVELOCITIES[vel[i]][2] + z,
@@ -48,7 +48,7 @@ inline void treatCase(double *collideField, int* flagField, int x0, int x1, int 
 
 void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, int xlength){
 
-	int vel[19];
+	int vel[5];
 
 
 	/* z=0 boundary */
@@ -208,5 +208,5 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	vel[2] = 14;
 	vel[3] = 0;
 	vel[4] = 6;
-	treatCase(collideField, flagField, 1, xlength, 0, 0, 1, xlength, vel, 5, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, xlength+1, xlength+1, 1, xlength, vel, 5, xlength, wallVelocity );
 }
