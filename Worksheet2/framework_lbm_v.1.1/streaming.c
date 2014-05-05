@@ -1,8 +1,11 @@
 #include "streaming.h"
 #include "LBDefinitions.h"
 #include "helper.h"
-/*#include<stdio.h>*/
 
+/*
+ * The Lattice-Boltzmann-Method is split in two steps - Collide and Streaming steps. 
+ * In this function the Streaming step is implemented
+ */
 void doStreaming( double *collideField, double *streamField, int *flagField, int xlength ){
  
   /* 
