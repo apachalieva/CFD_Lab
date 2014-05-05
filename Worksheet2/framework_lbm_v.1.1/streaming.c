@@ -8,7 +8,7 @@ void doStreaming( double *collideField, double *streamField, int *flagField, int
   /* 
    * This worksheet is restricted to the D3Q19 model - three-dimentional model with 19 lattice velocities ci 
    */		
-    int x, y, z, i;			 /* Helper variables for moving through the velocities in our 3D model */
+    int x, y, z, i;			 /* Helper variables for going through the velocities in our 3D model */
     
     for( z = 1; z < xlength + 1; ++z ){
       for( y = 1; y < xlength + 1; ++y ){
