@@ -18,18 +18,13 @@ void doCollision(double *collideField, int *flagField,const double * const tau,i
 		for(y=1ul; y<xlength+1; y++){
 			for(x=1ul; x<xlength+1; x++){
 				/* get the current cell */
-			    for( i = 0; i < Q; ++i ){ /*you sure about this?*/
-				currentCell = &collideField[ Q * ( x + (xlength+2) * y + SQ(xlength+2) * z ) + i ];
+				currentCell = collideField + Q * ( x + (xlength+2) * y + SQ(xlength+2) * z );
 			
 				/* compute collision */
 				computeDensity( currentCell, &density );
 				computeVelocity( currentCell, &density, velocity );
 				computeFeq( &density, velocity,feq );
 				computePostCollisionDistributions( currentCell, tau, feq );
-			    }
-				
 			}
-		}
-	}
 }
 
