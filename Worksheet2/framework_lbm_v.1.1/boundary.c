@@ -13,7 +13,7 @@ inline int getCell(int x, int y, int z, int xlength){
 	 return Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 }
 
-inline void treatCase(double *collideField, double* flagField, int x0, int x1, int y0, int y1, int z0, int z1, int const * const vel, int n, int xlenght, const double * const wallVelocity){
+inline void treatCase(double *collideField, int* flagField, int x0, int x1, int y0, int y1, int z0, int z1, int const * const vel, int n, int xlength, const double * const wallVelocity){
 	int x, y, z, i;
 	double density;
 
@@ -21,7 +21,7 @@ inline void treatCase(double *collideField, double* flagField, int x0, int x1, i
 		for(y=y0; y<=y1; y++)
 			for(x=x0; x<=x1; x++)
 					for(i=0; i<n; i++){
-						collideField[getCell(x, y, z) + vel[i]] =
+						collideField[getCell(x, y, z, xlength) + vel[i]] =
 								collideField[ getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
 														LATTICEVELOCITIES[vel[i]][1] + y,
 														LATTICEVELOCITIES[vel[i]][2] + z,
@@ -30,14 +30,14 @@ inline void treatCase(double *collideField, double* flagField, int x0, int x1, i
 											];
 
 
-						if(flagField[getCell(x, y, z)] == MOVING_WALL){
-							computeDensity(getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
+						if(flagField[getCell(x, y, z, xlength)] == MOVING_WALL){
+							computeDensity(collideField+ getCell(	LATTICEVELOCITIES[vel[i]][0] + x,
 													LATTICEVELOCITIES[vel[i]][1] + y,
 													LATTICEVELOCITIES[vel[i]][2] + z,
 													xlength),
 											&density);
 
-							collideField[getCell(x, y, z) + vel[i]] += 2.0 * LATTICEWEIGHTS[vel[i]] * density * DOTP(LATTICEVELOCITIES[vel[i]], wallVelocity) / SQ(C_S);
+							collideField[getCell(x, y, z, xlength) + vel[i]] += 2.0 * LATTICEWEIGHTS[vel[i]] * density * DOTP(LATTICEVELOCITIES[vel[i]], wallVelocity) / SQ(C_S);
 
 						}
 
@@ -48,27 +48,26 @@ inline void treatCase(double *collideField, double* flagField, int x0, int x1, i
 
 void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, int xlength){
 
-	int x, y, z, vel[19];
-	double * currentCell;
+	int vel[19];
 
 
 	/* z=0 boundary */
 
 	/* 			y=0 boundary */
 	vel[0] = 18;
-	treatCase(collideField, flagField, 1, xlenght, 0, 0, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, 0, 0, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			y=xlength+1 boundary */
 	vel[0] = 14;
-	treatCase(collideField, flagField, 1, xlenght, xlength+1, xlength+1, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, xlength+1, xlength+1, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			x=0 boundary */
 	vel[0] = 17;
-	treatCase(collideField, flagField, 0, 0, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 0, 0, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			x=xlength+1 boundary */
 	vel[0] = 15;
-	treatCase(collideField, flagField, xlenght+1, xlenght+1, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			inner face boundary */
 	vel[0] = 14;
@@ -76,25 +75,25 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	vel[2] = 16;
 	vel[3] = 17;
 	vel[4] = 18;
-	treatCase(collideField, flagField, 1, xlenght, 1, xlength, 0, 0, vel, 5, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, 1, xlength, 0, 0, vel, 5, xlength, wallVelocity );
 
 	/* z=xlength+1 boundary */
 
 	/* 			y=0 boundary */
 	vel[0] = 4;
-	treatCase(collideField, flagField, 1, xlenght, 0, 0, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, 0, 0, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
 
 	/* 			y=xlength+1 boundary */
 	vel[0] = 0;
-	treatCase(collideField, flagField, 1, xlenght, xlength+1, xlength+1, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, xlength+1, xlength+1, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
 
 	/* 			x=0 boundary */
 	vel[0] = 3;
-	treatCase(collideField, flagField, 0, 0, 1, xlenght, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 0, 0, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
 
 	/* 			x=xlength+1 boundary */
 	vel[0] = 1;
-	treatCase(collideField, flagField, xlenght+1, xlenght+1, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlength, xlength+1, xlength+1, vel, 1, xlength, wallVelocity );
 
 	/* 			inner face boundary */
 	vel[0] = 0;
@@ -102,7 +101,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	vel[2] = 2;
 	vel[3] = 3;
 	vel[4] = 4;
-	treatCase(collideField, flagField, 1, xlenght, 1, xlength, xlength+1, xlength+1, vel, 5, xlength, wallVelocity );
+	treatCase(collideField, flagField, 1, xlength, 1, xlength, xlength+1, xlength+1, vel, 5, xlength, wallVelocity );
 
 
 	/* x=0 boundary */
@@ -117,7 +116,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 
 	/* 			z=0 boundary */
 	vel[0] = 17;
-	treatCase(collideField, flagField, 0, 0, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, 0, 0, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			z=xlength+1 boundary */
 	vel[0] = 3;
@@ -145,7 +144,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 
 	/* 			z=0 boundary */
 	vel[0] = 15;
-	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlenght, 0, 0, vel, 1, xlength, wallVelocity );
+	treatCase(collideField, flagField, xlength+1, xlength+1, 1, xlength, 0, 0, vel, 1, xlength, wallVelocity );
 
 	/* 			z=xlength+1 boundary */
 	vel[0] = 1;
@@ -210,11 +209,4 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	vel[3] = 0;
 	vel[4] = 6;
 	treatCase(collideField, flagField, 1, xlength, 0, 0, 1, xlength, vel, 5, xlength, wallVelocity );
-
-
-
-
-
-
-
 }
