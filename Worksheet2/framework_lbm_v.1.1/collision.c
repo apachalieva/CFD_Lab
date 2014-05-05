@@ -48,7 +48,7 @@ inline void treatCase(double *collideField, int* flagField, int x0, int x1, int 
 
 void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, int xlength){
 
-	int vel[19];
+	int vel[5];
 
 
 	/* z=0 boundary */
