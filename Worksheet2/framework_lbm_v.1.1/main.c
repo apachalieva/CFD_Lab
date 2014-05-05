@@ -11,7 +11,7 @@
 
 
 int main (int argc, char *argv[]){
-	double *collideField=NULL, *streamField=NULL, tau, velocityWall[3];
+	double *collideField=NULL, *streamField=NULL, tau, velocityWall[3],viscosity,Rey;
 	int t, xlength, timesteps, timestepsPerPlotting, *flagField=NULL;
 	clock_t start = clock();
 
@@ -50,9 +50,17 @@ int main (int argc, char *argv[]){
 
 	}
 	
-	
 	float seconds = (float)(clock() - start) / CLOCKS_PER_SEC;
-	printf("MLUPS %f\n", (float)(CUBE(xlength+2) / 1000000) / seconds);	
+	
+	printf("\n\n    GROUP 6 - Worksheet 2\nSimulation with:\nnumber of cells: %d\n",xlength);
+    	printf("timesteps: %d\n",timesteps);
+	printf("velocity wall: %f %f %f\n",velocityWall[0],velocityWall[1],velocityWall[2]);
+	printf("tau (belonging to (0.5, 2)): %f\n",tau);
+	viscosity=SQ(C_S)*(tau-0.5);
+	Rey=sqrt(DOTP(velocityWall,velocityWall))*xlength/viscosity;
+	printf("Reynolds number: %f\n", Rey);
+	
+	printf("MLUPS: %f\n", (float)(CUBE(xlength+2) / 1000000) / seconds);	
 	
 	
 	/* 
