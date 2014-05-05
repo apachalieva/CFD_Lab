@@ -49,7 +49,7 @@ void writeVtkOutput(const double * const collideField, const int * const flagFie
 	char szFileName[BSIZE];
 	FILE *fp=NULL;
 
-	sprintf( szFileName, "%s.%i.vtk", "test", t );
+	sprintf( szFileName, "%s.%i.vtk", filename, t );
 	fp = fopen( szFileName, "w");
 	if( fp == NULL ){
 		char szBuff[BSIZE];
