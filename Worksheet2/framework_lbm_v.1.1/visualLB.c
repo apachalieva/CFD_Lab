@@ -28,14 +28,14 @@ void write_vtkHeader( FILE *fp, int xlength ) {
 
 void write_vtkPointCoordinates( FILE *fp, int xlength) {
 
-	unsigned long x, y, z;
+	int x, y, z;
 
 	/* set the coordinates in a unit cube */
 
-	for( z = 1ul; z < xlength+1; z++)
-	  for(y = 1ul; y < xlength+1; y++)
-		  for( x = 1ul; x < xlength+1; x++)
-				  fprintf(fp, "%f %f %f\n", (double)(x-1)/(xlength-1), (double)(y-1)/(xlength-1), (double)(z-1)/(xlength-1) );
+	for( z = 1; z < xlength+1; z++)
+		for(y = 1; y < xlength+1; y++)
+	  		for( x = 1ul; x < xlength+1; x++)
+				fprintf(fp, "%f %f %f\n", (double)(x-1)/(xlength-1), (double)(y-1)/(xlength-1), (double)(z-1)/(xlength-1) );
 
 }
 
@@ -44,7 +44,7 @@ void write_vtkPointCoordinates( FILE *fp, int xlength) {
 
 void writeVtkOutput(const double * const collideField, const int * const flagField, const char * filename, unsigned int t, int xlength) {
 
-	unsigned long x, y, z;
+	int x, y, z;
 	double density, velocity[DIM];
 	char szFileName[BSIZE];
 	FILE *fp=NULL;
@@ -67,9 +67,9 @@ void writeVtkOutput(const double * const collideField, const int * const flagFie
 	fprintf(fp, "VECTORS velocity float\n");
 
 
-	for(z=1ul; z < xlength+1; z++)
-		for( y=1ul; y < xlength+1; y++)
-			for(x=1ul; x < xlength+1; x++){
+	for(z=1; z < xlength+1; z++)
+		for( y=1; y < xlength+1; y++)
+			for(x=1; x < xlength+1; x++){
 				double const * const currentCell = collideField + Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 
 				computeDensity(currentCell, &density);
@@ -78,18 +78,16 @@ void writeVtkOutput(const double * const collideField, const int * const flagFie
 			}
 
 	fprintf(fp,"\n");
-	fprintf(fp,"CELL_DATA %i \n", CUBE(xlength-1) );
 	fprintf(fp, "SCALARS density float 1 \n");
 	fprintf(fp, "LOOKUP_TABLE default \n");
-	for(z=2ul; z < xlength+1; z++)
-		for(y=2ul; y < xlength+1; y++)
-			for(x=2ul; x < xlength+1; x++){
+	for(z=1; z < xlength+1; z++)
+		for(y=1; y < xlength+1; y++)
+			for(x=1; x < xlength+1; x++){
 				double const * const currentCell = collideField + Q * (x + (xlength+2) * y + SQ(xlength+2) * z);
 
 				computeDensity(currentCell, &density);
 				fprintf(fp, "%f\n", density );
 			}
-
 
 
 	if( fclose(fp) )
