@@ -24,7 +24,7 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     double *eps,               /* accuracy bound for pressure*/
                     double *dt_value,           /* time for output */
                     int *b, 					/* vector for boundaries */
-                    double *dp,					/* dp/dx gradient of pressure */
+                    double *dp,					/* dp pressure difference */
                     int *p)						/* specification of the problem */
 
 {
