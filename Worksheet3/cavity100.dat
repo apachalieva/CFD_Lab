@@ -20,7 +20,8 @@ tau	 	0.5
 #--------------------------------------------
 #               output
 #--------------------------------------------
-dt_value        0.5
+dt_value        5	
+# every five timesteps we print a VTK file
 
 #--------------------------------------------
 #               pressure
@@ -52,4 +53,33 @@ PI		0
 UI		0
 VI		0
 
+#--------------------------------------------
+#       boundaries
+# 		types of boundary:
+#		1: no-slip
+#		2: free slip (default, for numbers different from 1, or 3)
+#		3: outflow
+#		inflow boundaries are set accordingly to the problem 
+#		(see problem, down)
+#--------------------------------------------
 
+wl		1
+wr 		3
+wb		2
+wt		2
+
+#--------------------------------------------
+#       dp/dx
+#--------------------------------------------
+dp		1.0
+
+#--------------------------------------------
+#       p=PROBLEM
+#		specify type of problem
+# 		p = 0 for Karman vortex
+#		p = 1 for Plane shear flow
+#		p = 2 for flow over a step
+#		else: scenario prescribed by choice of wl		
+#--------------------------------------------
+
+p		5
