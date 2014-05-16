@@ -5,7 +5,7 @@
 #include "boundary_val.h"
 #include "sor.h"
 #include <stdio.h>
-
+#include <string.h>
 
 #define PARAMF "cavity100.dat"
 #define VISUAF "visual/cavity"
@@ -45,11 +45,30 @@
  * - calculate_uv() Calculate the velocity at the next time step.
  */
 int main(int argn, char** args){
-	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
+	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res,dp;
 	double **U, **V, **P, **F, **G, **RS;
-	int n, it, imax, jmax, itermax;
+	int n, it, imax, jmax, itermax, *boundaries, pb;
+	char problem[10];
 
-	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value );
+	/* change here
+		 * 4= number of boundaries
+		 */
+	boundaries=malloc(sizeof(*boundaries)*4);
+
+
+	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb);
+	/* setting of the problem */
+	switch (pb){
+		case 0:	strcpy(problem,"karman");
+		break;
+		case 1:	strcpy(problem,"shear");
+		break;
+		case 2:	strcpy(problem,"step");
+		break;
+		default: strcpy(problem,"none");
+		}
+
+	/* should we change the dimension of the matrices in order to save space? */
 
 	U=matrix ( 0 , imax+1 , 0 , jmax+1 );
 	V=matrix ( 0 , imax+1 , 0 , jmax+1 );
@@ -68,7 +87,10 @@ int main(int argn, char** args){
 	while(t<t_end){
 		if(tau>0) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 
-		boundaryvalues(imax, jmax, U, V);
+		boundaryvalues(imax, jmax, U, V, boundaries);	/* change here */
+		/* special inflow boundaries */
+		spec_boundary_val( problem, imax, jmax, U, V, Re, dp, ylength);
+
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
 		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
 
@@ -88,6 +110,7 @@ int main(int argn, char** args){
 	}
 
 	printf("U[imax/2][7*jmax/8]: %f", U[imax/2][7*jmax/8]);
+	/* we should print something here */
 
 
 
@@ -98,6 +121,7 @@ int main(int argn, char** args){
 	free_matrix(F,0,imax,0,jmax);
 	free_matrix(G,0,imax,0,jmax);
 	free_matrix(RS,0,imax,0,jmax);
+	free(boundaries);
 
 	return 0;
 }
