@@ -156,48 +156,28 @@ void boundaryvalues(
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double Re, double dp, double h){
+void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double **P, double u_in, double v_in, double dp){
 /* supposing the three different problems:
  * karman = Karman vortex street
  * shear = plane shear flow
- * steo = flow over a step
+ * step = flow over a step
  * we deal with these problems
  */
-	int j;
-	if (strcmp(problem,"karman")==0){
-		printf("setting the left boundary to velocity : u=1, v=0;\n");
-		for (j=1; j<=jmax; j++){
-			U[0][j]=1.0;
-			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-		}
-	}
-	else{
-		if(strcmp(problem,"shear")==0){
-			printf("setting the left boundary to velocity : u=-0.5*Re*(dp/dx)*y*(y-h), v=0;\n");
-			for (j=1; j<=jmax; j++){
-				U[0][j]= 1.0;		/* formula for parabolic velocity */
-													/* in a cell, U is at the midpoint of the vertical edge, so y=(j-0.5)*h/jmax); */
-				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-			}
-		}
-		else{
-			if(strcmp(problem,"step")==0){
-				printf("setting the left boundary: lower half = step, upper half: u=1, v=0;\n");
-				if (jmax%2!=0)
-					printf("odd number of cells on the vertical boundary: asymmetric problem!");
-				for (j = 1; j<=jmax/2; j++){
-						 	U[0][j]= 0.0;
-							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-					}
 
-				for (j = (jmax/2+1); j<=jmax; j++){
-						 	U[0][j]= 1.0;
-							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-						}
-			}
-			else{
-				printf("no particular problem selected\n");
-			}
+	int j;
+
+	if (strcmp(problem,"shear")==0){
+		/* pressure differece driven flow */
+
+		for (j=1; j<=jmax; j++){
+			P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */
+			P[imax+1][j]=-P[imax][j]; 					/* set right pressure dirichlet condition to p_w = 0 */
+		}
+	} else if (strcmp(problem,"karman")==0 || strcmp(problem,"step")==0){
+		/* printf("setting the left boundary to inflow velocity : u=u_in, v=v_in;\n"); */
+		for (j=1; j<=jmax; j++){
+			U[0][j]=u_in;
+			V[0][j]=-V[1][j] + 2.0 * v_in; 				/* setting the average equal to v_in */
 		}
 	}
 

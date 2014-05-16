@@ -24,6 +24,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     double *eps,               /* accuracy bound for pressure*/
                     double *dt_value,           /* time for output */
                     int *b, 					/* vector for boundaries */
+                    double *u_in,				/* x component of inflow velocity */
+                    double *v_in,				/* y component of inflow velocity */
                     double *dp,					/* dp pressure difference */
                     int *p)						/* specification of the problem */
 
@@ -63,6 +65,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
    read_int( szFileName, "wb", wb );
    read_int( szFileName, "wt", wt );
 
+   READ_DOUBLE( szFileName, *u_in );
+   READ_DOUBLE( szFileName, *v_in );
    READ_DOUBLE( szFileName, *dp );
    READ_INT   ( szFileName, *p );
 

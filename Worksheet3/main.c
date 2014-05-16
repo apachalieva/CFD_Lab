@@ -89,7 +89,7 @@ int main(int argn, char** args){
 
 		boundaryvalues(imax, jmax, U, V, boundaries);	/* change here */
 		/* special inflow boundaries */
-		spec_boundary_val( problem, imax, jmax, U, V, Re, dp, ylength);
+		spec_boundary_val( problem, imax, jmax, U, V, P, u_in, v_in, dp);
 
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
 		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);

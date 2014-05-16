@@ -69,7 +69,15 @@ wb		2
 wt		2
 
 #--------------------------------------------
-#       dp
+#       inflow velocity
+#			u_in = x component of inflow velocity
+#			v_in = y component of inflow velocity
+#--------------------------------------------
+u_in	1.0
+v_in	0.0
+
+#--------------------------------------------
+#		dp = pressure difference
 #--------------------------------------------
 dp		1.0
 

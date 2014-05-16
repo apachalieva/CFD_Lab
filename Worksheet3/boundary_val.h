@@ -16,6 +16,6 @@ void boundaryvalues(
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax,double **U, double **V, double Re, double dp, double h);
+void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double **P, double u_in, double v_in, double dp);
 
 #endif

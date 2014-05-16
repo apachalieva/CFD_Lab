@@ -9,7 +9,9 @@ void sor(
   int    jmax,
   double **P,
   double **RS,
-  double *res
+  double *res,
+  double dp,
+  char *problem			/* type of problem. It is needed to specify the pressure boundary conditions */
 ) {
   int i,j;
   double rloc;
@@ -37,14 +39,30 @@ void sor(
   *res = rloc;
 
 
-  /* set boundary values */
-  for(i = 1; i <= imax; i++) {
-    P[i][0] = P[i][1];
-    P[i][jmax+1] = P[i][jmax];
-  }
-  for(j = 1; j <= jmax; j++) {
-    P[0][j] = P[1][j];
-    P[imax+1][j] = P[imax][j];
-  }
+
+  	  /* set homogenous neumann boundary conditions for pressure in the horizontal haxes */
+	  for(i = 1; i <= imax; i++) {
+		P[i][0] = P[i][1];
+		P[i][jmax+1] = P[i][jmax];
+	  }
+
+	if (strcmp(problem,"shear")==0){
+		/* pressure differece driven flow */
+
+		for (j=1; j<=jmax; j++){
+			P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */
+			P[imax+1][j]=-P[imax][j]; 					/* set right pressure dirichlet condition to p_w = 0 */
+		}
+	} else {
+		  /* set homogenous neumann boundary conditions for pressure in the vertical haxes */
+
+		  for(j = 1; j <= jmax; j++) {
+		    P[0][j] = P[1][j];
+		    P[imax+1][j] = P[imax][j];
+		  }
+	}
+
+
+
 }
 
