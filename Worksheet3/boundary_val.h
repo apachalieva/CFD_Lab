@@ -9,7 +9,13 @@ void boundaryvalues(
   int imax,
   int jmax,
   double **U,
-  double **V
+  double **V,
+  int *b		/* vector representing different types of boundaries */
 );
+
+/* fuction for
+ * INFLOW boundary condition
+ */
+void spec_boundary_val( char* problem, int imax, int jmax,double **U, double **V, double Re, double dp, double h);
 
 #endif
