@@ -60,9 +60,9 @@ int read_parameters( const char *szFileName,       /* name of the file */
 		                               /* for pressure per time step */
                     double *eps,               /* accuracy bound for pressure*/
                     double *dt_value,           /* time for output */
-                    int *b, 					/* vector for boundaries */
-                    double *dp,					/* dp/dx gradient of pressure */
-                    int *p);					/* specification of the problem */
+                    int *b, 			/* vector for boundaries */
+                    double *dp,			/* dp/dx gradient of pressure */
+                    int *p);			/* specification of the problem */
 
 /**
  * The arrays U,V and P are initialized to the constant values UI, VI and PI on
@@ -78,6 +78,8 @@ void init_uvp(
   double **V,
   double **P
 );
+
+void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag );
 
 #endif
 
