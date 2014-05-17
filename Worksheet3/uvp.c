@@ -71,20 +71,68 @@ void calculate_fg(
   double **U,
   double **V,
   double **F,
-  double **G
+  double **G, 
+  int **Flag
 ){
-
 	int i,j;
-
-	/*boundary*/
+	
+	/* boundary conditions */
 	for(j=1; j<=jmax; j++){
-		F[0][j] = U[0][j];
-		F[imax][j] = U[imax][j];
+		F[ 0 ][ j ] = U[ 0 ][ j ];
+		F[ imax ][ j ] = U[ imax ][ j ];
 	}
 
 	for(i=1; i<=imax; i++){
 		G[i][0] = V[i][0];
 		G[i][jmax] = V[i][jmax];
+	}
+	
+	/* Boundary conditions for the obstacle cells */
+	for( i = 1; i <= imax; i++ ){
+	    for( j = 1; j <= jmax; j++ ){
+		if( Flag[i][j] < C_F ){
+		      /* Boundary conditions for obstacles with Northern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+			  G[ i ][ j ] = V[ i ][ j ]; 
+		      }
+		      /* Boundary conditions for obstacles with Southern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
+			  G[ i ][ j-1 ] = V[ i ][ j-1 ]; 
+		      }
+		      /* Boundary conditions for obstacles with Western fluid cell */
+		      if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+			  F[ i-1 ][ j ] = U[ i-1 ][ j ];
+		      }
+		      /* Boundary conditions for obstacles with Eastern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+			  F[ i ][ j ] = U[ i ][ j ];
+		      }
+		      
+		      /* Boundary conditions for obstacles with North-Eastern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
+			  F[ i ][ j ] = U[ i ][ j ]; 
+			  G[ i ][ j ] = V[ i ][ j ];
+		      }
+		      
+		      /* Boundary conditions for obstacles with North-Western fluid cell */
+		      if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
+			  F[ i-1 ][ j ] = U[ i-1 ][ j ]; 
+			  G[ i ][ j ] = V[ i ][ j ];
+		      }
+		      
+		      /* Boundary conditions for obstacles with South-Eastern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
+			  F[ i ][ j ] = U[ i ][ j ]; 
+			  G[ i ][ j-1 ] = V[ i ][ j-1 ];
+		      }
+		      
+		      /* Boundary conditions for obstacles with South-Western fluid cell */
+		      if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
+			  F[ i-1 ][ j ] = U[ i-1 ][ j ]; 
+			  G[ i ][ j-1 ] = V[ i ][ j-1 ];
+		      }
+		}
+	    }
 	}
 
 	/* inner values */

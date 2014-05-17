@@ -36,7 +36,8 @@ void calculate_fg(
   double **U,
   double **V,
   double **F,
-  double **G
+  double **G, 
+  int **Flag
 );
 
 

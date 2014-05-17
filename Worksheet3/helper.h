@@ -27,6 +27,31 @@
 extern clock_t last_timer_reset;   
 
 
+/**
+ * Cell definitions
+ */
+/* Fluid cell */ 
+#define C_F	16
+/* Obstacle cell */
+#define C_B	0
+
+/* Eastern baundary */
+#define B_E	8
+/* Western baundary */
+#define B_W	4
+/* Southern baundary */
+#define B_S	2
+/* Northern baundary */
+#define B_N	1
+/* South-Eastern baundary */
+#define B_SE	10
+/* South-Western baundary */
+#define B_SW	6
+/* North-Eastern baundary */
+#define B_NE	9
+/* North-Western baundary */
+#define B_NW	5 
+
 int min( int a, int b);	       
 int max( int a, int b);
 double fmin( double a, double b);

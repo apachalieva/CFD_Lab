@@ -14,8 +14,10 @@ void sor(
   double dy,
   int    imax,
   int    jmax,
+  const int fluid_cells,
   double **P,
   double **RS,
+  int    **Flag,
   double *res
 );
 
