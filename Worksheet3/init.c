@@ -1,6 +1,7 @@
 #include "helper.h"
 #include "init.h"
 
+
 int read_parameters( const char *szFileName,       /* name of the file */
                     double *Re,                /* reynolds number   */
                     double *UI,                /* velocity x-direction */
@@ -23,14 +24,12 @@ int read_parameters( const char *szFileName,       /* name of the file */
 		                               /* for pressure per time step */
                     double *eps,               /* accuracy bound for pressure*/
                     double *dt_value,           /* time for output */
-                    int *b, 					/* vector for boundaries */
-                    double *u_in,				/* x component of inflow velocity */
-                    double *v_in,				/* y component of inflow velocity */
-                    double *dp,					/* dp pressure difference */
-                    int *p)						/* specification of the problem */
+                    int *boundrs, 		/* vector for boundaries */
+                    double *dp,			/* dp/dx gradient of pressure */
+                    int *p)			/* specification of the problem */
 
 {
-	int *wl,*wb,*wr,*wt;
+   int *wl,*wb,*wr,*wt;
    READ_DOUBLE( szFileName, *xlength );
    READ_DOUBLE( szFileName, *ylength );
 
@@ -56,20 +55,17 @@ int read_parameters( const char *szFileName,       /* name of the file */
    READ_DOUBLE( szFileName, *PI );
 
    /* change here: reading boundaries */
-   wl = &b[ 0 ];
-   wr = &b[ 1 ];
-   wb = &b[ 2 ];
-   wt = &b[ 3 ];
+   wl = &boundrs[ 0 ];
+   wr = &boundrs[ 1 ];
+   wb = &boundrs[ 2 ];
+   wt = &boundrs[ 3 ];
    read_int( szFileName, "wl", wl );
    read_int( szFileName, "wr", wr );
    read_int( szFileName, "wb", wb );
    read_int( szFileName, "wt", wt );
 
-   READ_DOUBLE( szFileName, *u_in );
-   READ_DOUBLE( szFileName, *v_in );
    READ_DOUBLE( szFileName, *dp );
    READ_INT   ( szFileName, *p );
-
 
    *dx = *xlength / (double)(*imax);
    *dy = *ylength / (double)(*jmax);
@@ -91,8 +87,72 @@ void init_uvp(
 	init_matrix( U , 0, imax+1, 0, jmax+1, UI );
 	init_matrix( V , 0, imax+1, 0, jmax+1, VI );
 	init_matrix( P , 0, imax+1, 0, jmax+1, PI );
-
 }
 
 
+/* Initialize the flagfield regarding the problem choosen. 
+ * C_F	:	Fluid cell
+ * C_B	:	Obstacle cell
+ * 
+ * B_E	:	Boundary cell with Eastern fluid cell
+ * B_W	:	Boundary cell with Western fluid cell
+ * B_S	:	Boundary cell with Southern fluid cell
+ * B_N	:	Boundary cell with Northern fluid cell
+ * B_SE	:	Boundary cell with South-Eastern fluid cell
+ * B_SW	:	Boundary cell with South-Western fluid cell
+ * B_NE	:	Boundary cell with North-Eastern fluid cell
+ * B_NW	:	Boundary cell with North-Western fluid cell
+ * 
+ */
+void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag ){
+	
+	char filename[15];
+	char ext[] = ".pgm\0";
+	
+	int **buffer;
+	int i, j;
+	
+	snprintf( filename, sizeof filename, "%s%s", problem, ext );
+	buffer = read_pgm( filename );
+	
+	for( i = 0; i <= imax+1; i++ ){
+	    for( j = 0; j <= jmax+1; j++ ){
+		Flag[i][j] = buffer[i][j]*C_F; 
+	    }		
+	}
+	
+	for( i = 1; i <= imax; i++ ){
+	    for( j = 1; j <= jmax; j++ ){
+		if( Flag[i][j] == C_B  ){
+		    ( *fluid_cells )--;		/* Counting the number of fluid cells in the geometry */
+		    if( Flag[i+1][j] == C_F ){
+			Flag[i][j] |= B_E;
+		    }
+		    if( Flag[i-1][j] == C_F ){
+			Flag[i][j] |= B_W;
+		    }
+		    if( Flag[i][j-1] == C_F ){
+			Flag[i][j] |= B_S;
+		    }
+		    if( Flag[i][j+1] == C_F ){
+			Flag[i][j] |= B_N;
+		    }
 
+		    /* Forbidden cells */
+		    if( ( Flag[i][j] & ( B_E | B_W ) ) == ( B_E | B_W ) || 
+			( Flag[i][j] & ( B_S | B_N ) ) == ( B_S | B_N ) ){
+			  printf( "ERROR: Forbidden geometry!\n" );
+			  exit(1);
+		    }
+		}
+	    }
+	}
+	/*
+	printf(" %s *********************************\n", filename );
+	for( j = jmax+1; j >= 0; --j ){
+	    for( i = 0; i <= imax+1 ; ++i ){
+		printf( "%d ", Flag[i][j] );
+	    }
+	    printf( "\n" );
+	}*/
+}
