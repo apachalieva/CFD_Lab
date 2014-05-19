@@ -54,7 +54,9 @@ extern clock_t last_timer_reset;
 /* Left boundary pressure flag value */
 #define P_E		17
 /* Right boundary pressure flag value */
-#define P_W		17
+#define P_W		18
+
+#define IS_FLUID(a) (((a)&C_F)==C_F?1:0)
 
 int min( int a, int b);	       
 int max( int a, int b);

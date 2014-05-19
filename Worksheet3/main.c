@@ -83,7 +83,7 @@ int main(int argn, char** args){
 	RS = matrix ( 0 , imax , 0 , jmax );
 	
 	init_flag( problem, imax, jmax, &fluid_cells, Flag );
-	init_uvp(UI, VI, PI, imax, jmax, U, V, P);
+	init_uvp(UI, VI, PI, imax, jmax, U, V, P, Flag, problem);
 	
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	
@@ -98,11 +98,11 @@ int main(int argn, char** args){
 		spec_boundary_val( problem, imax, jmax, U, V, Re, dp, ylength);
 
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag );
-		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS );
+		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
 
 		it = 0;
 		res = 10000.0;
-		while( it < itermax && res > eps ){
+		while( it < itermax && fabs(res) > eps ){
 			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res, problem, dp );
 			it++;
 		}

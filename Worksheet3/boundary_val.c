@@ -261,7 +261,7 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 						}
 			}
 			else{
-				printf("no particular problem selected\n");
+				/*printf("no particular problem selected\n");*/
 			}
 		}
 	}

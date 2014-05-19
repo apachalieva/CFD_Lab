@@ -81,12 +81,28 @@ void init_uvp(
   int jmax,
   double **U,
   double **V,
-  double **P
+  double **P,
+  int **Flagfield,
+  char* problem
 ){
 
-	init_matrix( U , 0, imax+1, 0, jmax+1, UI );
-	init_matrix( V , 0, imax+1, 0, jmax+1, VI );
-	init_matrix( P , 0, imax+1, 0, jmax+1, PI );
+	/* init_matrix( U , 0, imax+1, 0, jmax+1, UI );
+	 init_matrix( V , 0, imax+1, 0, jmax+1, VI );
+	 init_matrix( P , 0, imax+1, 0, jmax+1, PI );*/
+
+	int i,j;
+
+	for(i=0;i<=imax+1; i++)
+		for(j=0;j<=jmax+1; j++){
+				U[i][j] =  IS_FLUID(Flagfield[i][j]) * UI;
+				V[i][j] =  IS_FLUID(Flagfield[i][j]) * VI;
+				P[i][j] =  IS_FLUID(Flagfield[i][j]) * PI;
+		}
+
+	if(strcmp(problem, "step") == 0)
+		for(i=1;i<=imax; i++)
+			for(j=1;j<=jmax/2; j++)
+					U[i][j] = 0;
 }
 
 
@@ -166,10 +182,10 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	    }
 	}
 
-	for( i = 1; i <= imax; i++ )
+	/*for( i = 1; i <= imax; i++ )
 		Flag[i][0] = P_E;
 	for( j = 1; j <= jmax; j++ )
-		Flag[0][j] = P_W;
+		Flag[0][j] = P_W;*/
 	/*
 	printf(" %s *********************************\n", filename );
 	for( j = jmax+1; j >= 0; --j ){

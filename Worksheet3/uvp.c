@@ -30,7 +30,7 @@ inline double ddx(double **m, int i, int j, double dx){
 inline double du2dx(double **m, int i, int j, double dx, double alpha){
 	return (
 			SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
-			+ alpha * ( abs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  abs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
+			+ alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
 	                       )/dx/4.0;
 }
 
@@ -38,7 +38,7 @@ inline double du2dx(double **m, int i, int j, double dx, double alpha){
 inline double dv2dy(double **m, int i, int j, double dy, double alpha){
 	return (
 			SQ(m[i][j]+m[i][j+1]) - SQ(m[i][j-1]+m[i][j])
-			+ alpha * ( abs(m[i][j]+m[i][j+1]) * (m[i][j]-m[i][j+1]) -  abs(m[i][j-1]+m[i][j]) * (m[i][j-1]-m[i][j]))
+			+ alpha * ( fabs(m[i][j]+m[i][j+1]) * (m[i][j]-m[i][j+1]) -  fabs(m[i][j-1]+m[i][j]) * (m[i][j-1]-m[i][j]))
 	                       )/dy/4.0;
 }
 
@@ -46,14 +46,14 @@ inline double dv2dy(double **m, int i, int j, double dy, double alpha){
 inline double duvdx(double ** u, double **v, int i, int j, double dx, double alpha){
 	return (
 			(u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]+v[i][j])
-			+ alpha * ( abs(u[i][j]+u[i][j+1]) * (v[i][j]-v[i+1][j]) -  abs(u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]-v[i][j]) )
+			+ alpha * ( fabs(u[i][j]+u[i][j+1]) * (v[i][j]-v[i+1][j]) -  fabs(u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]-v[i][j]) )
 	                       )/dx/4.0;
 }
 
 inline double duvdy(double **u, double **v, int i, int j, double dy, double alpha){
 	return (
 			(u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i][j-1]+u[i][j]) * (v[i][j-1]+v[i+1][j-1])
-			+ alpha * ( abs(v[i][j]+v[i+1][j]) * (u[i][j]-u[i][j+1]) -  abs(v[i][j-1]+v[i+1][j-1]) * (u[i][j-1]-u[i][j]) )
+			+ alpha * ( fabs(v[i][j]+v[i+1][j]) * (u[i][j]-u[i][j+1]) -  fabs(v[i][j-1]+v[i+1][j-1]) * (u[i][j-1]-u[i][j]) )
 	                       )/dy/4.0;
 }
 
@@ -161,13 +161,15 @@ void calculate_rs(
   int jmax,
   double **F,
   double **G,
-  double **RS
+  double **RS,
+  int **Flag
 ){
 	int i,j;
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			RS[i][j] = 1/dt*((F[i][j]-F[i-1][j])/dx + (G[i][j]-G[i][j-1])/dy) ;
+			if( IS_FLUID(Flag[i][j]) )
+				RS[i][j] = 1/dt*((F[i][j]-F[i-1][j])/dx + (G[i][j]-G[i][j-1])/dy) ;
 
 }
 

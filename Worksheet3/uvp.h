@@ -56,7 +56,8 @@ void calculate_rs(
   int jmax,
   double **F,
   double **G,
-  double **RS
+  double **RS,
+  int **Flag
 );
 
 

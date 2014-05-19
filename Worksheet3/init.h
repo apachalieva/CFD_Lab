@@ -76,7 +76,9 @@ void init_uvp(
   int jmax,
   double **U,
   double **V,
-  double **P
+  double **P,
+  int** Flagfield,
+  char* problem
 );
 
 void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag );
