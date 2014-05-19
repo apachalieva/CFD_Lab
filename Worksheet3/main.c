@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PARAMF "cavity100.dat"
-#define VISUAF "visual/cavity"
+#define PARAMF "cavity.dat"
+#define VISUAF "visual/sim"
 
 
 /**
