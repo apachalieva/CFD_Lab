@@ -138,15 +138,17 @@ void calculate_fg(
 	/* inner values */
 	for(i=1; i<=imax-1; i++)
 		for(j=1; j<=jmax; j++)
-			F[i][j] = U[i][j] + dt * (
-					(d2dx(U,i,j,dx) + d2dy(U,i,j,dy))/Re - du2dx(U, i, j, dx, alpha) - duvdy(U,V,i,j,dy, alpha) + GX
-					);
+			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F)
+				F[i][j] = U[i][j] + dt * (
+						(d2dx(U,i,j,dx) + d2dy(U,i,j,dy))/Re - du2dx(U, i, j, dx, alpha) - duvdy(U,V,i,j,dy, alpha) + GX
+						);
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
-			G[i][j] = V[i][j] + dt * (
-					(d2dx(V,i,j,dx) + d2dy(V,i,j,dy))/Re - duvdx(U, V, i, j, dx, alpha) - dv2dy(V,i,j,dy, alpha) + GY
-					);
+			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F)
+				G[i][j] = V[i][j] + dt * (
+						(d2dx(V,i,j,dx) + d2dy(V,i,j,dy))/Re - duvdx(U, V, i, j, dx, alpha) - dv2dy(V,i,j,dy, alpha) + GY
+						);
 
 }
 
@@ -204,17 +206,20 @@ void calculate_uv(
   double **V,
   double **F,
   double **G,
-  double **P
+  double **P,
+  int **Flag
 ){
 	int i,j;
 
 	for(i=1; i<=imax-1; i++)
 		for(j=1; j<=jmax; j++)
-			U[i][j] = F[i][j] - dt/dx*(P[i+1][j]-P[i][j]);
+			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F)
+				U[i][j] = F[i][j] - dt/dx*(P[i+1][j]-P[i][j]);
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
-			V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
+			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F)
+				V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
 
 
 }

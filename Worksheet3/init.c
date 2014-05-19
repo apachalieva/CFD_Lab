@@ -102,7 +102,8 @@ void init_uvp(
  * B_SW	:	Boundary cell with South-Western fluid cell
  * B_NE	:	Boundary cell with North-Eastern fluid cell
  * B_NW	:	Boundary cell with North-Western fluid cell
- * 
+ * P_E  :   Left boundary pressure flag value
+ * P_W	:	Right boundary pressure flag value
  */
 void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag ){
 	
@@ -112,13 +113,30 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	int **buffer;
 	int i, j;
 	
-	snprintf( filename, sizeof filename, "%s%s", problem, ext );
-	buffer = read_pgm( filename );
-	
-	for( i = 0; i <= imax+1; i++ ){
-	    for( j = 0; j <= jmax+1; j++ ){
-		Flag[i][j] = buffer[i][j]*C_F; 
-	    }		
+	if (strcmp(problem, "none") != 0){
+		snprintf( filename, sizeof filename, "%s%s", problem, ext );
+		buffer = read_pgm( filename );
+
+		for( i = 0; i <= imax+1; i++ ){
+			for( j = 0; j <= jmax+1; j++ ){
+			Flag[i][j] = buffer[i][j]*C_F;
+			}
+		}
+	} else {
+		for( i = 1; i <= imax; i++ ){
+			for( j = 1; j <= jmax; j++ ){
+				Flag[i][j] = C_F;
+			}
+		}
+		for( i = 1; i <= imax; i++ ){
+			Flag[i][0] = C_B;
+			Flag[i][jmax+1] = C_B;
+		}
+
+		for( j = 1; j <= jmax; j++ ){
+			Flag[0][j] = C_B;
+			Flag[imax+1][j] = C_B;
+		}
 	}
 	
 	for( i = 1; i <= imax; i++ ){
@@ -147,6 +165,11 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 		}
 	    }
 	}
+
+	for( i = 1; i <= imax; i++ )
+		Flag[i][0] = P_E;
+	for( j = 1; j <= jmax; j++ )
+		Flag[0][j] = P_W;
 	/*
 	printf(" %s *********************************\n", filename );
 	for( j = jmax+1; j >= 0; --j ){

@@ -103,14 +103,14 @@ int main(int argn, char** args){
 		it = 0;
 		res = 10000.0;
 		while( it < itermax && res > eps ){
-			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res );
+			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res, problem, dp );
 			it++;
 		}
 		if( it == itermax ){
 		    printf( "WARNING: Maximum number of iterations reached.\n" );
 		}
 
-		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P );
+		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
 
 		write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
 

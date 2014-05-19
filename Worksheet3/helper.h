@@ -51,6 +51,10 @@ extern clock_t last_timer_reset;
 #define B_NE	9
 /* North-Western baundary */
 #define B_NW	5 
+/* Left boundary pressure flag value */
+#define P_E		17
+/* Right boundary pressure flag value */
+#define P_W		17
 
 int min( int a, int b);	       
 int max( int a, int b);

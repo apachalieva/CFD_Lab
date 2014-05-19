@@ -104,7 +104,8 @@ void calculate_uv(
   double **V,
   double **F,
   double **G,
-  double **P
+  double **P,
+  int **Flag
 );
 
 #endif

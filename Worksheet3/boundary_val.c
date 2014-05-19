@@ -232,7 +232,7 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
  */
 	int j;
 	if (strcmp(problem,"karman")==0){
-		printf("setting the left boundary to velocity : u=1, v=0;\n");
+		/* printf("setting the left boundary to velocity : u=1, v=0;\n"); */
 		for (j=1; j<=jmax; j++){
 			U[0][j]=1.0;
 			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
@@ -240,16 +240,14 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 	}
 	else{
 		if(strcmp(problem,"shear")==0){
-			printf("setting the left boundary to velocity : u=-0.5*Re*(dp/dx)*y*(y-h), v=0;\n");
 			for (j=1; j<=jmax; j++){
-				U[0][j]= 1.0;		/* formula for parabolic velocity */
-													/* in a cell, U is at the midpoint of the vertical edge, so y=(j-0.5)*h/jmax); */
+				U[0][j]= 1.0;
 				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
 			}
 		}
 		else{
 			if(strcmp(problem,"step")==0){
-				printf("setting the left boundary: lower half = step, upper half: u=1, v=0;\n");
+				 /* printf("setting the left boundary: lower half = step, upper half: u=1, v=0;\n"); */
 				if (jmax%2!=0)
 					printf("odd number of cells on the vertical boundary: asymmetric problem!");
 				for (j = 1; j<=jmax/2; j++){
