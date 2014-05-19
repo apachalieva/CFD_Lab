@@ -18,17 +18,26 @@ void sor(
   double rloc;
   double coeff = omg/(2.0*(1.0/(dx*dx)+1.0/(dy*dy)));
 
-  
-  /* set boundary values */
+  /* set homogenous neumann boundary conditions for pressure in the horizontal walls */
   for(i = 1; i <= imax; i++) {
-      P[i][0] = P[i][1];
-      P[i][jmax+1] = P[i][jmax];
+	P[i][0] = P[i][1];
+	P[i][jmax+1] = P[i][jmax];
   }
-  for(j = 1; j <= jmax; j++) {
-      P[0][j] = P[1][j];
-      P[imax+1][j] = P[imax][j];
-  }
-  
+
+if (strcmp(problem,"shear")==0){
+	/* pressure differece driven flow */
+	for (j=1; j<=jmax; j++){
+		P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */
+		P[imax+1][j]=-P[imax][j]; 					/* set right pressure dirichlet condition to p_w = 0 */
+	}
+} else {
+	  /* set homogenous neumann boundary conditions for pressure in the vertical walls */
+	  for(j = 1; j <= jmax; j++) {
+	    P[0][j] = P[1][j];
+	    P[imax+1][j] = P[imax][j];
+	  }
+}
+
   /* Boundary conditions for the obstacle cells */
   for( i = 1; i <= imax; i++ ){
 	for( j = 1; j <= jmax; j++ ){
