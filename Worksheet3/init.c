@@ -182,6 +182,8 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	    }
 	}
 
+	free(buffer);
+
 	/*for( i = 1; i <= imax; i++ )
 		Flag[i][0] = P_E;
 	for( j = 1; j <= jmax; j++ )
