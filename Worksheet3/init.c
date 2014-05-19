@@ -118,8 +118,6 @@ void init_uvp(
  * B_SW	:	Boundary cell with South-Western fluid cell
  * B_NE	:	Boundary cell with North-Eastern fluid cell
  * B_NW	:	Boundary cell with North-Western fluid cell
- * P_E  :   Left boundary pressure flag value
- * P_W	:	Right boundary pressure flag value
  */
 void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag ){
 	
@@ -138,6 +136,9 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 			Flag[i][j] = buffer[i][j]*C_F;
 			}
 		}
+
+		free_imatrix(buffer,0,imax+1,0,jmax+1);
+
 	} else {
 		for( i = 1; i <= imax; i++ ){
 			for( j = 1; j <= jmax; j++ ){
@@ -181,19 +182,4 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 		}
 	    }
 	}
-
-	free(buffer);
-
-	/*for( i = 1; i <= imax; i++ )
-		Flag[i][0] = P_E;
-	for( j = 1; j <= jmax; j++ )
-		Flag[0][j] = P_W;*/
-	/*
-	printf(" %s *********************************\n", filename );
-	for( j = jmax+1; j >= 0; --j ){
-	    for( i = 0; i <= imax+1 ; ++i ){
-		printf( "%d ", Flag[i][j] );
-	    }
-	    printf( "\n" );
-	}*/
 }

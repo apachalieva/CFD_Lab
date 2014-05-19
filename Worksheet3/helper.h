@@ -51,10 +51,6 @@ extern clock_t last_timer_reset;
 #define B_NE	9
 /* North-Western baundary */
 #define B_NW	5 
-/* Left boundary pressure flag value */
-#define P_E		17
-/* Right boundary pressure flag value */
-#define P_W		18
 
 #define IS_FLUID(a) (((a)&C_F)==C_F?1:0)
 

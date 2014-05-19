@@ -33,11 +33,11 @@ double fmax( double a, double b)
 double fmatrix_max(double ** m, int nrl, int nrh, int ncl, int nch){
 	int i,j;
 
-	double max = abs(m[nrl][ncl]);
+	double max = fabs(m[nrl][ncl]);
 	for(i=nrl; i<=nrh; i++)
 		for(j=ncl; j<=nch; j++)
-			if ( abs(m[i][j]) > max )
-				max = abs(m[i][j]);
+			if ( fabs(m[i][j]) > max )
+				max = fabs(m[i][j]);
 	return max;
 }
 

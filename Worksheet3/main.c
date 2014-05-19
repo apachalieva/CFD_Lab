@@ -44,17 +44,23 @@
  *   iteration loop the operation sor() is used.
  * - calculate_uv() Calculate the velocity at the next time step.
  */
-int main(int argn, char** args){
+int main(int argc, char** args){
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res,dp;
 	double **U, **V, **P, **F, **G, **RS;
-	int n, it, imax, jmax, itermax, pb;
+	int n, step, it, imax, jmax, itermax, pb;
 	int fluid_cells;		/* Number of fluid cells in our geometry */
 	char problem[10];		/* Problem name, file name */
-	int boundaries[4];		
+	int boundaries[4];
+	char *fname;
 	
 	int **Flag;			/* Flagflield matrix */
 
-	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb);
+	if(argc>=2)
+		fname=args[1];
+	else
+		fname = PARAMF;
+
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb);
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -66,7 +72,6 @@ int main(int argn, char** args){
 		default: strcpy(problem,"none");
 		}
 
-	printf( "imax = %d, jmax = %d\n", imax, jmax );
 	
 	fluid_cells = imax*jmax;
 	
@@ -85,19 +90,20 @@ int main(int argn, char** args){
 	init_flag( problem, imax, jmax, &fluid_cells, Flag );
 	init_uvp(UI, VI, PI, imax, jmax, U, V, P, Flag, problem);
 	
-	printf( "Number of fluid cells = %d\n", fluid_cells );
-	
 	t=.0;
 	n=0;
+	step=0;
 
-	while( t < t_end ){
+	while( t <= t_end ){
 		if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 
-		boundaryvalues( imax, jmax, U, V, boundaries, Flag );	/* change here */
+		boundaryvalues( imax, jmax, U, V, boundaries, Flag );
 		/* special inflow boundaries */
 		spec_boundary_val( problem, imax, jmax, U, V, Re, dp, ylength);
 
+		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag );
+		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
 
 		it = 0;
@@ -106,21 +112,32 @@ int main(int argn, char** args){
 			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res, problem, dp );
 			it++;
 		}
-		if( it == itermax ){
-		    printf( "WARNING: Maximum number of iterations reached.\n" );
-		}
+
+		printf("[%d: %f] dt: %f, sor iterations: %d \n", n, t, dt, it);
+
+		if( it == itermax )
+		    printf( "    WARNING: Maximum number of iterations reached.\n" );
 
 		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
 
-		write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
-
 		t += dt;
 		n++;
+
+		if(step*dt_value <= t){
+			/* output vtk file for visualization */
+			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
+			step++;
+		}
+
 	}
 
-	/* printf("U[imax/2][7*jmax/8]: %f", U[imax/2][7*jmax/8]);*/
-	/* we should print something here */
+	printf("Problem: %s\n", problem );
+	printf( "imax = %d, jmax = %d\n", imax, jmax );
+	printf( "Number of fluid cells = %d\n", fluid_cells );
+	printf( "Reynolds number: %f\n", Re);
 
+
+	/* free memory */
 	free_matrix(U,0,imax+1,0,jmax+1);
 	free_matrix(V,0,imax+1,0,jmax+1);
 	free_matrix(P,0,imax+1,0,jmax+1);

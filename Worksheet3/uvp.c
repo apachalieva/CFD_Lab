@@ -1,9 +1,3 @@
-/*
- * uvp.c
- *
- *  Created on: Apr 16, 2014
- *      Author: davide
- */
 
 #include <stdlib.h>
 #include "helper.h"
