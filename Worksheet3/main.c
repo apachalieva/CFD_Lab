@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PARAMF "cavity.dat"
+#define PARAMF "problem.dat"
 #define VISUAF "visual/sim"
 
 
