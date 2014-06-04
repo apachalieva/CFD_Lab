@@ -63,11 +63,11 @@ void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *
 		int il_base = 0, jb_base=0;
 
 
-		for( j=1; i<=jproc; j++){
+		for( j=1; j<=jproc; j++){
 
-			jt = jb_base + jproc;
+			*jt = jb_base + j_block;
 			if(j <= jmax%jproc)
-				jt++;
+				(*jt)++;
 
 			for (i=1; i<=iproc; i++){
 
@@ -76,14 +76,14 @@ void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *
 
 				vars[0] = il_base; /*il*/
 
-				il_base += iproc;
+				il_base += i_block;
 				if(i <= imax%iproc)
 					il_base++;
 
 				vars[1] = il_base-1; /*ir*/
 
-				vars[2] = jbase;	 /* jb */
-				vars[3] = jt-1; /* jt*/
+				vars[2] = jb_base;	 /* jb */
+				vars[3] = (*jt)-1; /* jt*/
 
 				vars[4] = 	i>1 ? now-1 : MPI_PROC_NULL;	/*rank_l*/
 				vars[5] = 	i<iproc ? now+1 : MPI_PROC_NULL;	/*rank_r*/
@@ -96,7 +96,7 @@ void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *
 
 			}
 
-			jb_base = jt;
+			jb_base = *jt;
 		}
 
 	} else {

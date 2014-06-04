@@ -45,13 +45,13 @@
  *   iteration loop the operation sor() is used.
  * - calculate_uv() Calculate the velocity at the next time step.
  */
-int main(int argn, char** args){
+int main(int argc, char** argv){
 
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
 	double **U, **V, **P, **F, **G, **RS;
 	int n, it, imax, jmax, itermax;
 	int il, ir, jb, jt, rank_l, rank_r, rank_t, rank_b, omg_i, omg_j, myrank, nproc, iproc, jproc;			/* new int */
-	MPI_Status status;
+	/*MPI_Status status;*/
 
 
 	   /* initialisation */
