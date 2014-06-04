@@ -23,7 +23,7 @@ int read_parameters( const char *szFileName,       /* name of the file */
 		                               	   	   /* for pressure per time step */
                     double *eps,               /* accuracy bound for pressure*/
                     double *dt_value,          /* time for output */
-                    int* iproc				   /* number of processors along x direction */
+                    int* iproc,				   /* number of processors along x direction */
                     int* jproc				   /* number of processors along y direction */
 		    ){
    READ_DOUBLE( szFileName, *xlength );
