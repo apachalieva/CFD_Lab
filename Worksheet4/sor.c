@@ -21,36 +21,34 @@ void sor(
 
   /* set boundary values */
   if(il==1)
-  		for(j=jb; j<=jt; j++){
+  		for(j=jb-1; j<=jt+1; j++){
   		    P[0][j] = P[1][j];
   		}
 
   	if(ir==imax)
-  		for(j=jb; j<=jt; j++){
+  		for(j=jb-1; j<=jt+1; j++){
   			P[imax+1][j] = P[imax][j];
   		}
 
   	if(jb==1)
-  		for(i=il; i<=ir; i++){
+  		for(i=il-1; i<=ir+1; i++){
   			P[i][0] = P[i][1];
   		}
 
   	if(jt==jmax)
-  		for(i=il; i<=ir; i++){
+  		for(i=il-1; i<=ir+1; i++){
   			P[i][jmax+1] = P[i][jmax];
   		}
 
-
   /* SOR iteration */
-  for(i = il; i <= ir; i++) {
-    for(j = jb; j<=jt; j++) {
+  for(i = il; i <= ir; i++)
+    for(j = jb; j<=jt; j++)
       P[i][j] = (1.0-omg)*P[i][j]
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
-    }
-  }
 
   /* call the function pressure_comm(..) here, with the right parameters */
   pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t,  bufSend, bufRecv, status, chunk);
+
 
   /* compute the residual */
   rloc = 0;
@@ -62,9 +60,9 @@ void sor(
   }
   rloc = rloc/(imax*jmax);
 
+
   /* compute and spread the sum of local residuals to all processors */
   MPI_Allreduce(&rloc, &residual, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
   rloc = sqrt(residual);
 
   /* set residual */

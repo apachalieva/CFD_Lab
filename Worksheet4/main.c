@@ -98,128 +98,22 @@ int main(int argc, char** argv){
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, il, ir, jt, jb, imax, jmax, U, V, F, G);
 		calculate_rs(dt, dx, dy, il, ir, jt, jb, F, G, RS);
 
-	    if(myrank==1){
-	    		int i,j;
-		    	  printf("\n");
-		    	  printf("\n");
-		    	  printf("F%d\n", n);
-
-		    	    for(j = jb-1; j<=jt+1; j++) {
-		    	    	for(i = il-2; i <= ir+1; i++) {
-		    	      printf("%f ", F[i][j]);
-		    	    }
-		    	    printf("\n");
-		    	  }
-		    	  printf("\n");
-
-		    	  printf("\n");
-		    	  printf("\n");
-		    	  printf("G%d\n", n);
-
-		    	    for(j = jb-2; j<=jt+1; j++) {
-		    	    	for(i = il-1; i <= ir+1; i++) {
-		    	      printf("%f ", G[i][j]);
-		    	    }
-		    	    printf("\n");
-		    	  }
-		    	  printf("\n");
-
-		    	  printf("\n");
-		    	  printf("\n");
-		    	  printf("RS%d\n", n);
-
-		    	  for(j = jb; j<=jt; j++) {
-		    	  for(i = il; i <= ir; i++) {
-		    	      printf("%f ", RS[i][j]);
-		    	    }
-		    	    printf("\n");
-		    	  }
-		    	  printf("\n");
-		    	  printf("\n");
-		    	  printf("\n");
-
-	    	}
-
-
-
-		it = 0;
+		it=0;
 		res=10000.0;
-		while(it < itermax && res > eps){
-
-			/*if(myrank==0){
-				int i,j;
-			  printf("\n");
-			  printf("\n");
-			  printf("\n");
-			  for(i = il-1; i <= ir+1; i++) {
-			    for(j = jb-1; j<=jt+1; j++) {
-			      printf("%f ", P[i][j]);
-			    }
-			    printf("\n");
-			  }
-			  printf("\n");
-			  printf("\n");
-			  printf("\n");
-
-			}*/
+		while(it < itermax && res > eps) {
 
 			sor(omg, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
 
-			if (myrank==0){
-				sprintf(strbuf, "myrank %d, it %d, res %f", myrank, it, res);
-				Program_Message(strbuf);
-			}
 			it++;
 		}
+
 
 		if (myrank==0){
 			sprintf(strbuf, "[t %f, dt %f, it %d] sor terminated with res = %f ", t, dt, it, res);
 			Program_Message(strbuf);
 		}
 
-		Programm_Sync("a");
-		 if (n==3)exit(0);
-
 		calculate_uv(dt, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
-
-		 if(myrank==1){
-			    		int i,j;
-				    	  printf("\n");
-				    	  printf("\n");
-				    	  printf("U%d\n", n);
-
-				    	    for(j = jb-1; j<=jt+1; j++) {
-				    	    	for(i = il-2; i <= ir+1; i++) {
-				    	      printf("%f ", U[i][j]);
-				    	    }
-				    	    printf("\n");
-				    	  }
-				    	  printf("\n");
-
-				    	  printf("\n");
-				    	  printf("\n");
-				    	  printf("V%d\n", n);
-
-				    	    for(j = jb-2; j<=jt+1; j++) {
-				    	    	for(i = il-1; i <= ir+1; i++) {
-				    	      printf("%f ", V[i][j]);
-				    	    }
-				    	    printf("\n");
-				    	  }
-				    	  printf("\n");
-
-				    	  printf("P%d\n", n);
-
-				    	    for(j = jb; j<=jt; j++) {
-				    	    	for(i = il; i <= ir; i++) {
-				    	      printf("%f ", P[i][j]);
-				    	    }
-				    	    printf("\n");
-				    	  }
-				    	  printf("\n");
-				    	  printf("\n");
-				    	  printf("\n");
-			    	}
 
 		write_vtkFile(VISUAF, n, xlength, ylength, il, ir, jb, jt, myrank, dx, dy, U, V, P );
 

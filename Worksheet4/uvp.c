@@ -156,8 +156,8 @@ void calculate_dt(
   double **V
 ){
 
-	bufSend[0] = fmatrix_max(U, il, ir, jb, jt); /* local U max */
-	bufSend[1] = fmatrix_max(V, il, ir, jb, jt); /* local V max */
+	bufSend[0] = fmatrix_max(U, il-1, ir, jb, jt); /* local U max */
+	bufSend[1] = fmatrix_max(V, il, ir, jb-1, jt); /* local V max */
 
 	MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
@@ -183,6 +183,7 @@ void calculate_uv(
 	int i,j;
 
 
+
 	int ilb = il==1? il : il-1;
 	int irb = ir==imax? ir-1 : ir;
 
@@ -190,7 +191,6 @@ void calculate_uv(
 	for(i=ilb; i<=irb; i++)
 		for(j=jb; j<=jt; j++)
 			U[i][j] = F[i][j] - dt/dx*(P[i+1][j]-P[i][j]);
-
 
 	int jbb = jb==1? jb : jb-1;
 	int jtb = jt==jmax? jt-1 : jt;
