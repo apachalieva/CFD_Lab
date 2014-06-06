@@ -63,16 +63,18 @@ void init_uvp(
   double UI,
   double VI,
   double PI,
-  int imax,
-  int jmax,
+  int il,
+  int ir,
+  int jt,
+  int jb,
   double **U,
   double **V,
   double **P
 ){
 
-	init_matrix( U , 0, imax+1, 0, jmax+1, UI );
-	init_matrix( V , 0, imax+1, 0, jmax+1, VI );
-	init_matrix( P , 0, imax+1, 0, jmax+1, PI );
+	init_matrix( U , il-2 , ir+1 , jb-1 , jt+1, UI );
+	init_matrix( V , il-1 , ir+1 , jb-2 , jt+1, VI );
+	init_matrix( P , il-1 , ir+1 , jb-1 , jt+1, PI );
 
 }
 

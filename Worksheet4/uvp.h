@@ -1,6 +1,7 @@
 #ifndef __UVP_H__
 #define __UVP_H__
 
+#include <mpi.h>
 
 /**
  * Determines the value of U and G according to the formula
@@ -31,6 +32,10 @@ void calculate_fg(
   double dt,
   double dx,
   double dy,
+  int il,
+  int ir,
+  int jt,
+  int jb,
   int imax,
   int jmax,
   double **U,
@@ -51,8 +56,10 @@ void calculate_rs(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int il,
+  int ir,
+  int jt,
+  int jb,
   double **F,
   double **G,
   double **RS
@@ -73,6 +80,7 @@ void calculate_dt(
   double *dt,
   double dx,
   double dy,
+  int il, int ir, int jb, int jt, double *bufSend, double *bufRecv,
   int imax,
   int jmax,
   double **U,
@@ -97,6 +105,7 @@ void calculate_uv(
   double dt,
   double dx,
   double dy,
+  int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
   int imax,
   int jmax,
   double **U,

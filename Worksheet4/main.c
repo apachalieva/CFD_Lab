@@ -8,6 +8,7 @@
 #include "parallel.h"
 
 
+
 #define PARAMF "cavity100.dat"
 #define VISUAF "visual/cavity"
 
@@ -45,25 +46,30 @@
  *   iteration loop the operation sor() is used.
  * - calculate_uv() Calculate the velocity at the next time step.
  */
+
+
 int main(int argc, char** argv){
 
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
-	double **U, **V, **P, **F, **G, **RS;
+	double **U, **V, **P, **F, **G, **RS, *bufSend, *bufRecv;
 	int n, it, imax, jmax, itermax;
 	int il, ir, jb, jt, rank_l, rank_r, rank_t, rank_b, omg_i, omg_j, myrank, nproc, iproc, jproc;			/* new int */
-	/*MPI_Status status;*/
-
-
+	MPI_Status status;
+	char strbuf[1000];
 	   /* initialisation */
-	MPI_Init( &argc, &argv );                    /* execute n processes      */
+	MPI_Init( &argc, &argv );
 	MPI_Comm_size( MPI_COMM_WORLD, &nproc );     /* asking for the number of processes  */
 	MPI_Comm_rank( MPI_COMM_WORLD, &myrank );    /* asking for the local process id   */
 
+	printf("Processors: %d \n", nproc);
 
 	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &iproc, &jproc );
 
 	init_parallel (iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
 			&rank_r, &rank_b, &rank_t, &omg_i, &omg_j, nproc);
+
+	sprintf(strbuf, "myrank %d, il %d, ir %d, jb %d, jt %d, rank_l %d, rank_r %d, rank_b %d, rank_t %d, omg_i %d, omg_j %d", myrank, il, ir, jb, jt, rank_l,rank_r, rank_b, rank_t, omg_i, omg_j);
+	Program_Message(strbuf);
 
 	/* changes in the dimensions of the matrices */
 	U=matrix ( il-2 , ir+1 , jb-1 , jt+1 );
@@ -74,29 +80,148 @@ int main(int argc, char** argv){
 	G=matrix ( il-1 , ir+1 , jb-2 , jt+1 );
 	RS=matrix ( il , ir , jb , jt );
 
-	/* TO MODIFY!!!*/
-	init_uvp(UI, VI, PI, imax, jmax, U, V, P);
+	init_uvp(UI, VI, PI, il, ir, jt, jb, U, V, P);
+
+	/* allocate communication buffers */
+	bufSend=malloc(sizeof(*bufSend)*  max(ir-il+2 + ir-il+1, jt-jb+1 + jt-jb+2 ) );
+	bufRecv=malloc(sizeof(*bufRecv)*  max(ir-il+2 + ir-il+1, jt-jb+1 + jt-jb+2 ) );
+
+
 
 	t=.0;
 	n=0;
 
 	while(t<t_end){
-		if(tau>0) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
+		if(tau>0) calculate_dt(Re, tau, &dt, dx, dy, il, ir, jt, jb, bufSend, bufRecv, imax, jmax, U, V);
 
-		boundaryvalues(imax, jmax, U, V);
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
-		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
+		boundaryvalues( il, ir, jt, jb, imax, jmax, U, V);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, il, ir, jt, jb, imax, jmax, U, V, F, G);
+		calculate_rs(dt, dx, dy, il, ir, jt, jb, F, G, RS);
+
+	    if(myrank==1){
+	    		int i,j;
+		    	  printf("\n");
+		    	  printf("\n");
+		    	  printf("F%d\n", n);
+
+		    	    for(j = jb-1; j<=jt+1; j++) {
+		    	    	for(i = il-2; i <= ir+1; i++) {
+		    	      printf("%f ", F[i][j]);
+		    	    }
+		    	    printf("\n");
+		    	  }
+		    	  printf("\n");
+
+		    	  printf("\n");
+		    	  printf("\n");
+		    	  printf("G%d\n", n);
+
+		    	    for(j = jb-2; j<=jt+1; j++) {
+		    	    	for(i = il-1; i <= ir+1; i++) {
+		    	      printf("%f ", G[i][j]);
+		    	    }
+		    	    printf("\n");
+		    	  }
+		    	  printf("\n");
+
+		    	  printf("\n");
+		    	  printf("\n");
+		    	  printf("RS%d\n", n);
+
+		    	  for(j = jb; j<=jt; j++) {
+		    	  for(i = il; i <= ir; i++) {
+		    	      printf("%f ", RS[i][j]);
+		    	    }
+		    	    printf("\n");
+		    	  }
+		    	  printf("\n");
+		    	  printf("\n");
+		    	  printf("\n");
+
+	    	}
+
+
 
 		it = 0;
 		res=10000.0;
 		while(it < itermax && res > eps){
-			sor(omg, dx, dy, imax, jmax, P, RS, &res);
+
+			/*if(myrank==0){
+				int i,j;
+			  printf("\n");
+			  printf("\n");
+			  printf("\n");
+			  for(i = il-1; i <= ir+1; i++) {
+			    for(j = jb-1; j<=jt+1; j++) {
+			      printf("%f ", P[i][j]);
+			    }
+			    printf("\n");
+			  }
+			  printf("\n");
+			  printf("\n");
+			  printf("\n");
+
+			}*/
+
+			sor(omg, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
+
+			if (myrank==0){
+				sprintf(strbuf, "myrank %d, it %d, res %f", myrank, it, res);
+				Program_Message(strbuf);
+			}
 			it++;
 		}
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
+		if (myrank==0){
+			sprintf(strbuf, "[t %f, dt %f, it %d] sor terminated with res = %f ", t, dt, it, res);
+			Program_Message(strbuf);
+		}
 
-		write_vtkFile(VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
+		Programm_Sync("a");
+		 if (n==3)exit(0);
+
+		calculate_uv(dt, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
+
+		 if(myrank==1){
+			    		int i,j;
+				    	  printf("\n");
+				    	  printf("\n");
+				    	  printf("U%d\n", n);
+
+				    	    for(j = jb-1; j<=jt+1; j++) {
+				    	    	for(i = il-2; i <= ir+1; i++) {
+				    	      printf("%f ", U[i][j]);
+				    	    }
+				    	    printf("\n");
+				    	  }
+				    	  printf("\n");
+
+				    	  printf("\n");
+				    	  printf("\n");
+				    	  printf("V%d\n", n);
+
+				    	    for(j = jb-2; j<=jt+1; j++) {
+				    	    	for(i = il-1; i <= ir+1; i++) {
+				    	      printf("%f ", V[i][j]);
+				    	    }
+				    	    printf("\n");
+				    	  }
+				    	  printf("\n");
+
+				    	  printf("P%d\n", n);
+
+				    	    for(j = jb; j<=jt; j++) {
+				    	    	for(i = il; i <= ir; i++) {
+				    	      printf("%f ", P[i][j]);
+				    	    }
+				    	    printf("\n");
+				    	  }
+				    	  printf("\n");
+				    	  printf("\n");
+				    	  printf("\n");
+			    	}
+
+		write_vtkFile(VISUAF, n, xlength, ylength, il, ir, jb, jt, myrank, dx, dy, U, V, P );
 
 		t += dt;
 		n++;
@@ -111,6 +236,10 @@ int main(int argc, char** argv){
 	free_matrix(F, il-2 , ir+1 , jb-1 , jt+1 );
 	free_matrix(G, il-1 , ir+1 , jb-2 , jt+1 );
 	free_matrix(RS, il , ir , jb , jt );
+
+	/* deallocate comunication buffers */
+	free(bufSend);
+	free(bufRecv);
 
 	Programm_Stop("finished");
 

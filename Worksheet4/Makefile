@@ -1,5 +1,5 @@
 CC = mpicc
-CFLAGS = -Wall -pedantic -Werror -g -std=gnu99
+CFLAGS = -Wall -pedantic -Werror -g -std=gnu99 
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\
@@ -13,7 +13,7 @@ OBJ = 	helper.o\
 
 
 all:  $(OBJ)
-	$(CC) $(CFLAGS) -o sim $(OBJ)  -lm
+	$(CC) $(CFLAGS) -o sim $(OBJ)  -lm -lmpi
 
 %.o : %.c
 	$(CC) -c $(CFLAGS) $*.c -o $*.o

@@ -1,6 +1,8 @@
 #ifndef __SOR_H_
 #define __SOR_H_
 
+#include <mpi.h>
+
 /**
  * One GS iteration for the pressure Poisson equation. Besides, the routine must 
  * also set the boundary values for P according to the specification. The 
@@ -12,6 +14,7 @@ void sor(
   double omg,
   double dx,
   double dy,
+  int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
   int    imax,
   int    jmax,
   double **P,

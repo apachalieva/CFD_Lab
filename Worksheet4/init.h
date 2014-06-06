@@ -72,8 +72,10 @@ void init_uvp(
   double UI,
   double VI,
   double PI,
-  int imax,
-  int jmax,
+  int il,
+  int ir,
+  int jt,
+  int jb,
   double **U,
   double **V,
   double **P
