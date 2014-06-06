@@ -103,8 +103,8 @@ int main(int argc, char** argv){
 		while(it < itermax && res > eps) {
 
 			sor(omg, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
-
 			it++;
+
 		}
 
 
@@ -115,7 +115,7 @@ int main(int argc, char** argv){
 
 		calculate_uv(dt, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
 
-		write_vtkFile(VISUAF, n, xlength, ylength, il, ir, jb, jt, myrank, dx, dy, U, V, P );
+		write_vtkFile(VISUAF, n, xlength, ylength, il, ir, jt, jb, myrank, dx, dy, U, V, P );
 
 		t += dt;
 		n++;
