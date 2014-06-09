@@ -440,7 +440,7 @@ int **read_pgm(const char *filename)
     int xsize, ysize;
     int i1, j1;
     int **pic = NULL;
-    
+
 
     if ((input=fopen(filename,"rb"))==0)
     {
@@ -510,6 +510,6 @@ int **read_pgm(const char *filename)
 
     /* close file */
     fclose(input);
-    
+
     return pic;
 }
