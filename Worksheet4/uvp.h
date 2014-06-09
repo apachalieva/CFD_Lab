@@ -80,7 +80,7 @@ void calculate_dt(
   double *dt,
   double dx,
   double dy,
-  int il, int ir, int jb, int jt, double *bufSend, double *bufRecv,
+  int il, int ir, int jt, int jb, double *bufSend, double *bufRecv,
   int imax,
   int jmax,
   double **U,

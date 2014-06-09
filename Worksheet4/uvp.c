@@ -98,6 +98,7 @@ void calculate_fg(
 		}
 
 
+	/* boundary of computation: compute values on the local domain boundary just if it is not the global domain boundary */
 	int ilb = il==1? il : il-1;
 	int irb = ir==imax? ir-1 : ir;
 
@@ -108,6 +109,7 @@ void calculate_fg(
 					(d2dx(U,i,j,dx) + d2dy(U,i,j,dy))/Re - du2dx(U, i, j, dx, alpha) - duvdy(U,V,i,j,dy, alpha) + GX
 					);
 
+	/* boundary of computation: compute values on the local domain boundary just if it is not the global domain boundary */
 	int jbb = jb==1? jb : jb-1;
 	int jtb = jt==jmax? jt-1 : jt;
 
@@ -161,24 +163,11 @@ void calculate_dt(
 	/* local V max */
 	bufSend[1] = fmatrix_max(V, il-1, ir+1, jb-2, jt+1);
 
+	/* compute and spread the maximum value in U and V */
 	MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 	/* all processors compute the dt */
 	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/bufRecv[0] 	), dy/bufRecv[1] );
-
-	/*double loc_umax = fmatrix_max(U, il-2, ir+1, jb-1, jt+1);
-	double loc_vmax = fmatrix_max(V, il-1, ir+1, jb-2, jt+1);
-
-	double glob_umax, glob_vmax;
-
-	//glob_umax = loc_umax;
-	//glob_vmax = loc_vmax;
-
-	MPI_Allreduce(&loc_umax, &glob_umax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-	MPI_Allreduce(&loc_vmax, &glob_vmax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-
-	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/glob_umax 	), dy/glob_vmax );*/
-
 }
 
 
@@ -210,11 +199,12 @@ void calculate_uv(
 	int jbb = jb==1? jb : jb-1;
 	int jtb = jt==jmax? jt-1 : jt;
 
+	/* inner values */
 	for(i=il; i<=ir; i++)
 		for(j=jbb; j<=jtb; j++)
 			V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
 
-
+	/* comunicate u and v */
 	uv_comm(U, V, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, status, chunk);
 
 }
