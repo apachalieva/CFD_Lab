@@ -104,7 +104,7 @@ int main(int argc, char** argv){
 		it=0;
 		res=10000.0;
 		while(it < itermax && fabs(res) > eps) {
-			sor(omg, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
+			sor(omg, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, imax, jmax, P, RS, &res);
 			it++;
 		}
 
@@ -115,7 +115,7 @@ int main(int argc, char** argv){
 		}
 
 		/* compute and calculate uv */
-		calculate_uv(dt, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
+		calculate_uv(dt, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, imax, jmax, U, V, F, G, P);
 
 		t += dt;
 		n++;

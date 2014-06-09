@@ -7,7 +7,7 @@ void sor(
   double omg,
   double dx,
   double dy,
-  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
+  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status,
   int    imax,
   int    jmax,
   double **P,
@@ -47,7 +47,7 @@ void sor(
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
 
   /* comunicate pressure */
-  pressure_comm(P, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t,  bufSend, bufRecv, status, chunk);
+  pressure_comm(P, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t,  bufSend, bufRecv, status);
 
   /* compute the residual */
   rloc = 0;

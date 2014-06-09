@@ -140,7 +140,7 @@ void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *
 }
 
 
-void pressure_comm(double **P, int il,int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double* bufRecv,MPI_Status *status, int chunck){
+void pressure_comm(double **P, int il,int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double* bufRecv,MPI_Status *status){
 	int i,j;
 
 	/* send left, receive right */
@@ -193,7 +193,7 @@ void pressure_comm(double **P, int il,int ir, int jt, int jb, int rank_l, int ra
 
 }
 
-void uv_comm(double **U, double **V, int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk){
+void uv_comm(double **U, double **V, int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status){
 
 	int i,j, u_bsize, v_bsize, bsize;
 

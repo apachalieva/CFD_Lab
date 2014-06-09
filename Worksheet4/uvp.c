@@ -175,7 +175,7 @@ void calculate_uv(
   double dt,
   double dx,
   double dy,
-  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
+  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status,
   int imax,
   int jmax,
   double **U,
@@ -205,7 +205,6 @@ void calculate_uv(
 			V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
 
 	/* comunicate u and v */
-	uv_comm(U, V, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, status, chunk);
-
+	uv_comm(U, V, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, status);
 }
 
