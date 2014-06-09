@@ -149,7 +149,7 @@ void calculate_dt(
   double *dt,
   double dx,
   double dy,
-  int il, int ir, int jb, int jt, double *bufSend, double *bufRecv,
+  int il, int ir, int jt, int jb, double *bufSend, double *bufRecv,
   int imax,
   int jmax,
   double **U,
@@ -157,25 +157,27 @@ void calculate_dt(
 ){
 
 	/* local U max */
-	/*bufSend[0] = fmatrix_max(U, il-1, ir, jb, jt);*/
+	bufSend[0] = fmatrix_max(U, il-2, ir+1, jb-1, jt+1);
 	/* local V max */
-	/*bufSend[1] = fmatrix_max(V, il, ir, jb-1, jt);*/
+	bufSend[1] = fmatrix_max(V, il-1, ir+1, jb-2, jt+1);
 
-	/*MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);*/
+	MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 	/* all processors compute the dt */
-	/* *dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/bufRecv[0] 	), dy/bufRecv[1] ); */
+	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/bufRecv[0] 	), dy/bufRecv[1] );
 
-	double loc_umax = fmatrix_max(U, il-1, ir, jb, jt);
-	double loc_vmax = fmatrix_max(V, il, ir, jb-1, jt);
+	/*double loc_umax = fmatrix_max(U, il-2, ir+1, jb-1, jt+1);
+	double loc_vmax = fmatrix_max(V, il-1, ir+1, jb-2, jt+1);
 
 	double glob_umax, glob_vmax;
 
+	//glob_umax = loc_umax;
+	//glob_vmax = loc_vmax;
 
 	MPI_Allreduce(&loc_umax, &glob_umax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 	MPI_Allreduce(&loc_vmax, &glob_vmax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
-	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/glob_umax 	), dy/glob_vmax );
+	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/glob_umax 	), dy/glob_vmax );*/
 
 }
 
@@ -184,7 +186,7 @@ void calculate_uv(
   double dt,
   double dx,
   double dy,
-  int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
+  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
   int imax,
   int jmax,
   double **U,
@@ -213,7 +215,7 @@ void calculate_uv(
 			V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
 
 
-	uv_comm(U, V, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, status, chunk);
+	uv_comm(U, V, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, status, chunk);
 
 }
 

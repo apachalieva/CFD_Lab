@@ -48,7 +48,7 @@ void Programm_Stop(char *txt)
 }
 
 
-void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *il, int *ir, int *jb, int *jt, int *rank_l,
+void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *il, int *ir, int *jt, int *jb, int *rank_l,
 		int *rank_r, int *rank_b, int *rank_t, int *omg_i, int *omg_j, int num_proc){
 
 	int vars[10];
@@ -153,7 +153,7 @@ void init_parallel (int iproc, int jproc, int imax, int jmax, int *myrank, int *
 }
 
 
-void pressure_comm(double **P, int il,int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double* bufRecv,MPI_Status *status, int chunck){
+void pressure_comm(double **P, int il,int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double* bufRecv,MPI_Status *status, int chunck){
 	int i,j;
 	/*char strbuf[500];*/
 
@@ -236,7 +236,7 @@ void pressure_comm(double **P, int il,int ir, int jb, int jt, int rank_l, int ra
 		free(bufRecv);*/
 }
 
-void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk){
+void uv_comm(double **U, double **V, int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk){
 
 	int i,j, u_bsize, v_bsize, bsize;
 
@@ -254,7 +254,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 			for (j=0; j<v_bsize; j++)
 				bufSend[j] = V[il][jb+j-1];
 			for (j=0; j<u_bsize; j++)
-				bufSend[j+v_bsize] = U[il-1][jb+j];
+				bufSend[j+v_bsize] = U[il][jb+j];
 		}
 
 		MPI_Sendrecv(bufSend, bsize , MPI_DOUBLE, rank_l, 5,bufRecv, bsize, MPI_DOUBLE,rank_r, 5, MPI_COMM_WORLD , status);
@@ -273,7 +273,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 				for (j=0; j<v_bsize; j++)
 					bufSend[j] = V[ir][jb+j-1];
 				for (j=0; j<u_bsize; j++)
-					bufSend[j+v_bsize] = U[ir][jb+j];
+					bufSend[j+v_bsize] = U[ir-1][jb+j];
 			}
 
 			MPI_Sendrecv(bufSend, bsize, MPI_DOUBLE, rank_r, 6, bufRecv, bsize, MPI_DOUBLE,rank_l, 6, MPI_COMM_WORLD , status);
@@ -298,7 +298,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		/* send top, receive bottom */
 		if(rank_t!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
-				bufSend[i] = V[il+i][jt];
+				bufSend[i] = V[il+i][jt-1];
 			for (i=0; i<u_bsize; i++)
 				bufSend[i+v_bsize] = U[il-1+i][jt];
 		}
@@ -317,7 +317,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		/* send bottom, receive top */
 		if(rank_b!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
-				bufSend[i] = V[il+i][jb-1];
+				bufSend[i] = V[il+i][jb];
 			for (i=0; i<u_bsize; i++)
 				bufSend[i+v_bsize] = U[il-1+i][jb];
 		}

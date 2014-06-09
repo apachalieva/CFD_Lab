@@ -14,7 +14,7 @@ void sor(
   double omg,
   double dx,
   double dy,
-  int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
+  int il, int ir, int jt, int jb, int rank_l, int rank_r, int rank_b, int rank_t, double *bufSend, double *bufRecv, MPI_Status *status, int chunk,
   int    imax,
   int    jmax,
   double **P,

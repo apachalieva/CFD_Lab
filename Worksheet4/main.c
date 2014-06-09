@@ -76,7 +76,7 @@ int main(int argc, char** argv){
 
 	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &iproc, &jproc );
 
-	init_parallel (iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
+	init_parallel (iproc, jproc, imax, jmax, &myrank, &il, &ir, &jt, &jb, &rank_l,
 			&rank_r, &rank_b, &rank_t, &omg_i, &omg_j, nproc);
 
 	sprintf(strbuf, "myrank %d, il %d, ir %d, jb %d, jt %d, rank_l %d, rank_r %d, rank_b %d, rank_t %d, omg_i %d, omg_j %d", myrank, il, ir, jb, jt, rank_l,rank_r, rank_b, rank_t, omg_i, omg_j);
@@ -97,9 +97,6 @@ int main(int argc, char** argv){
 	bufSend=malloc(sizeof(*bufSend)*  max(ir-il+2 + ir-il+1, jt-jb+1 + jt-jb+2 ) );
 	bufRecv=malloc(sizeof(*bufRecv)*  max(ir-il+2 + ir-il+1, jt-jb+1 + jt-jb+2 ) );
 
-
-	Programm_Sync("cane");
-
 	t=.0;
 	n=0;
 
@@ -112,18 +109,18 @@ int main(int argc, char** argv){
 
 		it=0;
 		res=10000.0;
-		while(it < itermax && res > eps) {
+		while(it < itermax && fabs(res) > eps) {
 
-			sor(omg, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
+			sor(omg, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, P, RS, &res);
 			it++;
 
 		}
 
-		if(myrank==2){
+		/*if(myrank==2){
 			print_matr("P", n, P, il, ir, jt, jb, 0, 0);
 			print_matr("U", n, U, il, ir, jt, jb, 1, 0);
 			print_matr("V", n, V, il, ir, jt, jb, 0, 1);
-		}
+		}*/
 
 
 
@@ -132,7 +129,7 @@ int main(int argc, char** argv){
 			Program_Message(strbuf);
 		}
 
-		calculate_uv(dt, dx, dy, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
+		calculate_uv(dt, dx, dy, il, ir, jt, jb, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, 0, imax, jmax, U, V, F, G, P);
 
 		write_vtkFile(VISUAF, n, xlength, ylength, il, ir, jt, jb, myrank, dx, dy, U, V, P );
 
