@@ -30,6 +30,16 @@ double fmax( double a, double b)
     return b;
 }
 
+double fmatrix_max(double ** m, int nrl, int nrh, int ncl, int nch){
+	int i,j;
+
+	double max = abs(m[nrl][ncl]);
+	for(i=nrl; i<=nrh; i++)
+		for(j=ncl; j<=nch; j++)
+			if ( abs(m[i][j]) > max )
+				max = abs(m[i][j]);
+	return max;
+}
 
 /* ----------------------------------------------------------------------- */
 /*                         local auxiliary functions                       */
@@ -365,7 +375,7 @@ void free_matrix( double **m, int nrl, int nrh, int ncl, int nch )
    free( pArray );
 }
 
-void init_matrix( double **m, int nrl, int nrh, int ncl, int nch, double a)
+void init_matrix( double ** m, int nrl, int nrh, int ncl, int nch, double a)
 {
    int i,j;
    for( i = nrl; i <= nrh; i++)

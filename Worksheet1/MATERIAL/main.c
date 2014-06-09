@@ -1,7 +1,14 @@
 #include "helper.h"
 #include "visual.h"
 #include "init.h"
+#include "uvp.h"
+#include "boundary_val.h"
+#include "sor.h"
 #include <stdio.h>
+
+
+#define PARAMF "cavity100.dat"
+#define VISUAF "visual/cavity"
 
 
 /**
@@ -38,5 +45,59 @@
  * - calculate_uv() Calculate the velocity at the next time step.
  */
 int main(int argn, char** args){
-  return -1;
+	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
+	double **U, **V, **P, **F, **G, **RS;
+	int n, it, imax, jmax, itermax;
+
+	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value );
+
+	U=matrix ( 0 , imax+1 , 0 , jmax+1 );
+	V=matrix ( 0 , imax+1 , 0 , jmax+1 );
+	P=matrix ( 0 , imax+1 , 0 , jmax+1 );
+
+	F=matrix ( 0 , imax , 0 , jmax );
+	G=matrix ( 0 , imax , 0 , jmax );
+	RS=matrix ( 0 , imax , 0 , jmax );
+
+
+	init_uvp(UI, VI, PI, imax, jmax, U, V, P);
+
+	t=.0;
+	n=0;
+
+	while(t<t_end){
+		if(tau>0) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
+
+		boundaryvalues(imax, jmax, U, V);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
+		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
+
+		it = 0;
+		res=10000.0;
+		while(it < itermax && res > eps){
+			sor(omg, dx, dy, imax, jmax, P, RS, &res);
+			it++;
+		}
+
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
+
+		write_vtkFile(VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
+
+		t += dt;
+		n++;
+	}
+
+	printf("U[imax/2][7*jmax/8]: %f", U[imax/2][7*jmax/8]);
+
+
+
+	free_matrix(U,0,imax+1,0,jmax+1);
+	free_matrix(V,0,imax+1,0,jmax+1);
+	free_matrix(P,0,imax+1,0,jmax+1);
+
+	free_matrix(F,0,imax,0,jmax);
+	free_matrix(G,0,imax,0,jmax);
+	free_matrix(RS,0,imax,0,jmax);
+
+	return 0;
 }

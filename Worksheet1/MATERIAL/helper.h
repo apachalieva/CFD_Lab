@@ -32,6 +32,8 @@ int max( int a, int b);
 double fmin( double a, double b);
 double fmax( double a, double b);
 
+double fmatrix_max(double ** m, int nrl, int nrh, int ncl, int nch);
+
 
 /**
  * Error handling:
