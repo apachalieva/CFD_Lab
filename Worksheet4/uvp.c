@@ -156,13 +156,26 @@ void calculate_dt(
   double **V
 ){
 
-	bufSend[0] = fmatrix_max(U, il-1, ir, jb, jt); /* local U max */
-	bufSend[1] = fmatrix_max(V, il, ir, jb-1, jt); /* local V max */
+	/* local U max */
+	/*bufSend[0] = fmatrix_max(U, il-1, ir, jb, jt);*/
+	/* local V max */
+	/*bufSend[1] = fmatrix_max(V, il, ir, jb-1, jt);*/
 
-	MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+	/*MPI_Allreduce(bufSend, bufRecv, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);*/
 
 	/* all processors compute the dt */
-	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/bufRecv[0] 	), dy/bufRecv[1] );
+	/* *dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/bufRecv[0] 	), dy/bufRecv[1] ); */
+
+	double loc_umax = fmatrix_max(U, il-1, ir, jb, jt);
+	double loc_vmax = fmatrix_max(V, il, ir, jb-1, jt);
+
+	double glob_umax, glob_vmax;
+
+
+	MPI_Allreduce(&loc_umax, &glob_umax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+	MPI_Allreduce(&loc_vmax, &glob_vmax, 1,  MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+	*dt = tau * fmin( fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) , dx/glob_umax 	), dy/glob_vmax );
 
 }
 

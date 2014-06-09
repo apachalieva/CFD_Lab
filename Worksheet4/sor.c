@@ -3,6 +3,17 @@
 #include "parallel.h"
 #include <mpi.h>
 
+void print_matr2(char* name, int n, double** M, int il,int  ir,int  jt,int  jb, int ioffs, int joffs){
+	int i,j;
+	printf("\n\n Matrix %s [%d] \n", name, n);
+
+	for(j = jt+1; j>=jb-1-joffs; j--){
+	  for(i = il-1-ioffs; i <= ir+1; i++)
+	    	printf("%f\t", M[i][j]);
+	    printf("\n");
+	    }
+}
+
 void sor(
   double omg,
   double dx,
@@ -46,9 +57,15 @@ void sor(
       P[i][j] = (1.0-omg)*P[i][j]
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
 
+
+	if(rank_r==3){
+		print_matr2("---------- P", -1, P, il, ir, jt, jb, 0, 0);
+	}
   /* call the function pressure_comm(..) here, with the right parameters */
   pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t,  bufSend, bufRecv, status, chunk);
-
+	if(rank_r==3){
+		print_matr2("P", -1, P, il, ir, jt, jb, 0, 0);
+	}
 
   /* compute the residual */
   rloc = 0;

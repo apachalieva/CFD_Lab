@@ -168,7 +168,7 @@ void pressure_comm(double **P, int il,int ir, int jb, int jt, int rank_l, int ra
 			for (j=jb; j<=jt; j++)
 				bufSend[j-jb]=P[il][j];
 
-		/*sprintf(strbuf, "sendrecv for pressune 1");
+		/*sprintf(strbuf, "sendrecv for pressure 1");
 		Program_Message(strbuf);*/
 		MPI_Sendrecv(bufSend, jt-jb+1 , MPI_DOUBLE, rank_l, 1,bufRecv, jt-jb+1, MPI_DOUBLE,rank_r, 1, MPI_COMM_WORLD , status);
 		/*sprintf(strbuf, "received for pressure 1");
@@ -298,9 +298,9 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		/* send top, receive bottom */
 		if(rank_t!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
-				bufSend[i] = V[il+i][jt+1];
-			for (j=0; j<u_bsize; j++)
-				bufSend[i+v_bsize] = U[il-1+i][jt+1];
+				bufSend[i] = V[il+i][jt];
+			for (i=0; i<u_bsize; i++)
+				bufSend[i+v_bsize] = U[il-1+i][jt];
 		}
 
 		MPI_Sendrecv(bufSend, bsize , MPI_DOUBLE, rank_t, 7, bufRecv, bsize, MPI_DOUBLE,rank_b, 7, MPI_COMM_WORLD , status);
@@ -309,7 +309,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		if(rank_b!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
 				V[il+i][jb-2] = bufRecv[i];
-			for (j=0; j<u_bsize; j++)
+			for (i=0; i<u_bsize; i++)
 				U[il-1+i][jb-1] = bufRecv[i+v_bsize];
 		}
 
@@ -318,7 +318,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		if(rank_b!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
 				bufSend[i] = V[il+i][jb-1];
-			for (j=0; j<u_bsize; j++)
+			for (i=0; i<u_bsize; i++)
 				bufSend[i+v_bsize] = U[il-1+i][jb];
 		}
 
@@ -328,7 +328,7 @@ void uv_comm(double **U, double **V, int il, int ir, int jb, int jt, int rank_l,
 		if(rank_t!=MPI_PROC_NULL){
 			for (i=0; i<v_bsize; i++)
 				V[il+i][jt+1] = bufRecv[i];
-			for (j=0; j<u_bsize; j++)
+			for (i=0; i<u_bsize; i++)
 				U[il-1+i][jt+1] = bufRecv[i+v_bsize];
 		}
 

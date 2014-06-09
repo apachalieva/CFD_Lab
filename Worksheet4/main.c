@@ -48,6 +48,17 @@
  */
 
 
+void print_matr(char* name, int n, double** M, int il,int  ir,int  jt,int  jb, int ioffs, int joffs){
+	int i,j;
+	printf("\n\n Matrix %s [%d] \n", name, n);
+
+	for(j = jt+1; j>=jb-1-joffs; j--){
+	  for(i = il-1-ioffs; i <= ir+1; i++)
+	    	printf("%f\t", M[i][j]);
+	    printf("\n");
+	    }
+}
+
 int main(int argc, char** argv){
 
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
@@ -87,6 +98,7 @@ int main(int argc, char** argv){
 	bufRecv=malloc(sizeof(*bufRecv)*  max(ir-il+2 + ir-il+1, jt-jb+1 + jt-jb+2 ) );
 
 
+	Programm_Sync("cane");
 
 	t=.0;
 	n=0;
@@ -106,6 +118,13 @@ int main(int argc, char** argv){
 			it++;
 
 		}
+
+		if(myrank==2){
+			print_matr("P", n, P, il, ir, jt, jb, 0, 0);
+			print_matr("U", n, U, il, ir, jt, jb, 1, 0);
+			print_matr("V", n, V, il, ir, jt, jb, 0, 1);
+		}
+
 
 
 		if (myrank==0){
