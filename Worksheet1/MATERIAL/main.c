@@ -47,7 +47,7 @@
 int main(int argn, char** args){
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res;
 	double **U, **V, **P, **F, **G, **RS;
-	int n, it, imax, jmax, itermax;
+	int n, it, imax, jmax, itermax,step=0;
 
 	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value );
 
@@ -74,21 +74,28 @@ int main(int argn, char** args){
 
 		it = 0;
 		res=10000.0;
-		while(it < itermax && res > eps){
+		while(it < itermax && fabs(res) > eps){
 			sor(omg, dx, dy, imax, jmax, P, RS, &res);
 			it++;
 		}
 
+		printf("[%d: %f] dt: %f, sor iterations: %d \n", n, t, dt, it);
+
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
-
-		write_vtkFile(VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
-
+		
 		t += dt;
 		n++;
+		
+		if(step*dt_value <= t){
+			/* output vtk file for visualization */
+			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
+			step++;
+		}		
+		
 	}
 
-	printf("U[imax/2][7*jmax/8]: %f", U[imax/2][7*jmax/8]);
-
+	/*printf("U[imax/2][7*jmax/8]: %f", U[imax/2][7*jmax/8]);
+	*/
 
 
 	free_matrix(U,0,imax+1,0,jmax+1);
