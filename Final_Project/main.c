@@ -46,6 +46,9 @@
 int main(int argc, char** args){
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res,dp;
 	double **U, **V, **P, **F, **G, **RS;
+	double **KA;					/* turbulent kinetic energy k */
+	double **EP; 					/* dissipation rate epsilon */
+	double K, E, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
 	int n, step, it, imax, jmax, itermax, pb;
 	int fluid_cells;		/* Number of fluid cells in our geometry */
 	char problem[10];		/* Problem name, file name */
@@ -59,7 +62,7 @@ int main(int argc, char** args){
 	else
 		fname = PARAMF;
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb);
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &K, &E, &cn, &ce, &c1, &c2 );
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -86,6 +89,9 @@ int main(int argc, char** args){
 	G = matrix ( 0 , imax , 0 , jmax );
 	RS = matrix ( 0 , imax , 0 , jmax );
 
+	KA=matrix ( 0 , imax+1 , 0 , jmax+1 );
+	EP=matrix ( 0 , imax+1 , 0 , jmax+1 ); 
+	
 	init_flag( problem, imax, jmax, &fluid_cells, Flag );
 	init_uvp(UI, VI, PI, imax, jmax, U, V, P, Flag, problem);
 

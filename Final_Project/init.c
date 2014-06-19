@@ -26,8 +26,14 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     double *dt_value,           /* time for output */
                     int *boundrs, 		/* vector for boundaries */
                     double *dp,			/* dp/dx gradient of pressure */
-                    int *p)			/* specification of the problem */
-
+                    int *p,			/* specification of the problem */
+        		    double *K,	/* kinetic energy intial value */
+        		    double *E,	/* dissipation rate initial value */
+        		    double *cn,	/* turbolent eddy viscosity */
+        		    double *ce,	/* turbolent modelling constants */
+        		    double *c1,
+        		    double *c2
+)
 {
    int *wl,*wb,*wr,*wt;
    READ_DOUBLE( szFileName, *xlength );
@@ -53,6 +59,14 @@ int read_parameters( const char *szFileName,       /* name of the file */
    READ_DOUBLE( szFileName, *GX );
    READ_DOUBLE( szFileName, *GY );
    READ_DOUBLE( szFileName, *PI );
+
+   READ_DOUBLE( szFileName, *K );
+   READ_DOUBLE( szFileName, *E );
+
+   READ_DOUBLE( szFileName, *cn );
+   READ_DOUBLE( szFileName, *ce );
+   READ_DOUBLE( szFileName, *c1 );
+   READ_DOUBLE( szFileName, *c2 );
 
    /* change here: reading boundaries */
    wl = &boundrs[ 0 ];
