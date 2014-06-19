@@ -223,7 +223,7 @@ void boundaryvalues(
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double Re, double dp, double h){
+void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double **k, double **eps, double Re, double dp, double h){
 /* supposing the three different problems:
  * karman = Karman vortex street
  * shear = plane shear flow
@@ -236,6 +236,9 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 		for (j=1; j<=jmax; j++){
 			U[0][j]=1.0;
 			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
+			eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+			k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+
 		}
 	}
 	else{
@@ -243,6 +246,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 			for (j=1; j<=jmax; j++){
 				U[0][j]= 1.0;
 				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
+				eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+				k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
 			}
 		}
 		else{
@@ -258,6 +263,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 				for (j = (jmax/2+1); j<=jmax; j++){
 						 	U[0][j]= 1.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
+							eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+							k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
 						}
 			}
 			else{
@@ -265,6 +272,108 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 			}
 		}
 	}
+
+}
+
+void newmann_k_eps(int imax, int jmax, double** k, int c){
+
+	int i,j;
+
+		switch (c){
+		case 0:{	/* left boundary */
+			for (j=1; j<=jmax; j++){
+				k[0][j]=k[1][j];				/* 	set the normal derivative of k to zero. Remark: if we want to set
+				 	 	 	 	 	 	 	 	 *	them to something different from 0: change RHS
+				 	 	 	 	 	 	 	 	 **/
+				}
+			}
+		break;
+		case 1:{	/* right boundary */
+			for (j=1; j<=jmax; j++){
+				k[imax+1][j]=k[imax][j];		/* 	set the normal derivative of k to zero. Remark: if we want to set
+												 *	them to something different from 0: change RHS
+												 **/
+				}
+			}
+		break;
+		case 2:{	/* bottom boundary */
+			for (i=1; i<=imax; i++){
+				k[i][0]=k[i][1];				/* 	set the normal derivative of k to zero. Remark: if we want to set
+												 *	them to something different from 0: change RHS
+												 **/
+			}
+
+			}
+		break;
+		case 3:{	/* top boundary */
+			for (i=1; i<=imax; i++){
+				k[i][jmax+1]=k[i][jmax];			/* 	set the normal derivative of k to zero. Remark: if we want to set
+													 *	them to something different from 0: change RHS
+													 **/
+			}
+
+			}
+		break;
+		}
+
+}
+
+
+void boundaryvalues_k_eps(int imax, int jmax, double** k,int* boundaries,int** Flag){
+		int i, j;
+		int c;
+
+		for( c = 0; c < 4; c++ ){
+			/* setting everything to newmann (homogeneous)
+			 * inflow (Dirichlet) treated separately
+			 * */
+			newmann_k_eps( imax, jmax, k, c);
+			}
+
+
+/* Boundary conditions for the obstacle cells for k or eps (the same of the pressure) */
+   for( i = 1; i <= imax; i++ ){
+ 	for( j = 1; j <= jmax; j++ ){
+ 	    if( Flag[i][j] < C_F ){
+ 		/* Boundary conditions for obstacles with Northern fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+ 		    k[ i ][ j ] = k[ i ][ j+1 ];
+ 		}
+ 		/* Boundary conditions for obstacles with Southern fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_S ) == B_S ){
+ 		    k[ i ][ j ] = k[ i ][ j-1 ];
+ 		}
+ 		/* Boundary conditions for obstacles with Western fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+ 		    k[ i ][ j ] = k[ i-1 ][ j ];
+ 		}
+ 		/* Boundary conditions for obstacles with Eastern fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+ 		    k[ i ][ j ] = k[ i+1 ][ j ];
+ 		}
+
+ 		/* Boundary conditions for obstacles with North-Eastern fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
+ 		    k[ i ][ j ] = 0.5*( k[ i+1 ][ j ] + k[ i ][ j+1 ] );
+ 		}
+
+ 		/* Boundary conditions for obstacles with North-Western fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
+ 		    k[ i ][ j ] = 0.5*( k[ i-1 ][ j ] + k[ i ][ j+1 ] );				/* is the mean still acceptable?? */
+ 		}
+
+ 		/* Boundary conditions for obstacles with South-Eastern fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
+ 		    k[ i ][ j ] = 0.5*( k[ i+1 ][ j ] + k[ i ][ j-1 ] );				/* is the mean still acceptable?? */
+ 		}
+
+ 		/* Boundary conditions for obstacles with South-Western fluid cell */
+ 		if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
+ 		    k[ i ][ j ] = 0.5*( k[ i-1 ][ j ] + k[ i ][ j-1 ] );				/* is the mean still acceptable?? */
+ 		}
+ 	    }
+ 	}
+    }
 
 }
 
