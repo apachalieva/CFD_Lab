@@ -20,9 +20,15 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     double *omg,               /* relaxation factor */
                     double *tau,               /* safety factor for time step*/
                     int  *itermax,             /* max. number of iterations  */
-		                               /* for pressure per time step */
+		                               	   	   /* for pressure per time step */
                     double *eps,               /* accuracy bound for pressure*/
-		    double *dt_value)           /* time for output */
+		    double *dt_value,           /* time for output */
+		    double *K,	/* kinetic energy intial value */
+		    double *E,	/* dissipation rate initial value */
+		    double *cn,	/* turbolent eddy viscosity */
+		    double *ce,	/* turbolent modelling constants */
+		    double *c1,
+		    double *c2
 {
    READ_DOUBLE( szFileName, *xlength );
    READ_DOUBLE( szFileName, *ylength );
@@ -47,6 +53,14 @@ int read_parameters( const char *szFileName,       /* name of the file */
    READ_DOUBLE( szFileName, *GX );
    READ_DOUBLE( szFileName, *GY );
    READ_DOUBLE( szFileName, *PI );
+
+   READ_DOUBLE( szFileName, *K );
+   READ_DOUBLE( szFileName, *E );
+
+   READ_DOUBLE( szFileName, *cn );
+   READ_DOUBLE( szFileName, *ce );
+   READ_DOUBLE( szFileName, *c1 );
+   READ_DOUBLE( szFileName, *c2 );
 
    *dx = *xlength / (double)(*imax);
    *dy = *ylength / (double)(*jmax);
