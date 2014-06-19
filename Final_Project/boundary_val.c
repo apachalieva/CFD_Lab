@@ -9,30 +9,35 @@
 #include "boundary_val.h"
 #include "helper.h"
 
-void no_slip(int imax, int jmax, double** U, double** V,int c){
+void no_slip(int imax, int jmax, double** U, double** V, double** K, double **E, int c){
 
 	int i,j;
 
 	switch (c){
 	case 0:{	/* left boundary */
 		for (j=1; j<=jmax; j++){
-			U[0][j]=0;						/* set zero to u-values exactly at the boundary */
+			U[0][j]=.0;						/* set zero to u-values exactly at the boundary */
 			V[0][j] = -V[1][j];				/* set the v-values not at the boundary so that the mean in the boundary is zero */
+			K[0][j]=-K[1][j];
+			E[0][j]=E[1][j];
 			}
 		}
 	break;
 	case 1:{	/* right boundary */
 		for (j=1; j<=jmax; j++){
-			U[imax][j]=0;					/* set zero to u-values exactly at the boundary */
+			U[imax][j]=.0;					/* set zero to u-values exactly at the boundary */
 			V[imax+1][j] = -V[imax][j];		/* set the v-values not at the boundary so that the mean in the boundary is zero */
-
+			K[imax+1][j]=-K[imax][j];
+			E[imax+1][j]=E[imax][j];
 			}
 		}
 	break;
 	case 2:{	/* bottom boundary */
 		for (i=1; i<=imax; i++){
 			U[i][0]=-U[i][1];				/* set the u-values not at the boundary so that the mean in the boundary is zero */
-			V[i][0]=0;						/* set zero to v-values exactly at the boundary */
+			V[i][0]=.0;						/* set zero to v-values exactly at the boundary */
+			K[i][0]=-K[i][1];
+			E[i][0]=E[i][1];
 			}
 
 		}
@@ -40,7 +45,9 @@ void no_slip(int imax, int jmax, double** U, double** V,int c){
 	case 3:{	/* top boundary */
 		for (i=1; i<=imax; i++){
 			U[i][jmax+1]=-U[i][jmax];		/* set the u-values not at the boundary so that the mean in the boundary is zero */
-			V[i][jmax]=0;						/* set zero to v-values exactly at the boundary */
+			V[i][jmax]=.0;						/* set zero to v-values exactly at the boundary */
+			K[i][jmax+1]=-K[i][jmax];
+			E[i][jmax+1]=E[i][jmax];
 			}
 
 		}
@@ -49,7 +56,7 @@ void no_slip(int imax, int jmax, double** U, double** V,int c){
 
 }
 
-void free_slip(int imax, int jmax, double** U, double** V, int c){
+void free_slip(int imax, int jmax, double** U, double** V, double** K, double **E, int c){
 
 	int i,j;
 
@@ -58,6 +65,8 @@ void free_slip(int imax, int jmax, double** U, double** V, int c){
 		for (j=1; j<=jmax; j++){
 			U[0][j]=0;						/* set zero to u-values exactly at the boundary */
 			V[0][j] = V[1][j];				/* set the v-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[0][j]=K[1][j];				/* check this */
+			E[0][j]=E[1][j];
 			}
 		}
 	break;
@@ -65,6 +74,8 @@ void free_slip(int imax, int jmax, double** U, double** V, int c){
 		for (j=1; j<=jmax; j++){
 			U[imax][j]=0;					/* set zero to u-values exactly at the boundary */
 			V[imax+1][j] = V[imax][j];		/* set the v-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[imax+1][j]=K[imax][j];		/* check this */
+			E[imax+1][j]=E[imax][j];
 			}
 		}
 	break;
@@ -72,6 +83,8 @@ void free_slip(int imax, int jmax, double** U, double** V, int c){
 		for (i=1; i<=imax; i++){
 			U[i][0]=U[i][1];				/* set the u-values not at the boundary so that the derivative normal to the boundary is zero */
 			V[i][0]=0;						/* set zero to v-values exactly at the boundary */
+			K[i][0]=K[i][1];				/* check this */
+			E[i][0]=E[i][1];
 			}
 
 		}
@@ -80,6 +93,8 @@ void free_slip(int imax, int jmax, double** U, double** V, int c){
 		for (i=1; i<=imax; i++){
 			U[i][jmax+1]=U[i][jmax];		/* set the u-values not at the boundary so that the derivative normal to the boundary is zero */
 			V[i][jmax]=0;					/* set zero to v-values exactly at the boundary */
+			K[i][jmax+1]=K[i][jmax];		/* check this */
+			E[i][jmax+1]=E[i][jmax];
 			}
 
 		}
@@ -88,7 +103,7 @@ void free_slip(int imax, int jmax, double** U, double** V, int c){
 
 }
 
-void outflow(int imax, int jmax, double** U, double** V, int c){
+void outflow(int imax, int jmax, double** U, double** V, double** K, double **E, int c){
 
 	int i,j;
 
@@ -97,6 +112,8 @@ void outflow(int imax, int jmax, double** U, double** V, int c){
 		for (j=1; j<=jmax; j++){
 			U[0][j]=U[1][j];				/* set the normal derivative of u to zero */
 			V[0][j] = V[1][j];				/* set the normal derivative of v to zero */
+			K[0][j]=K[1][j];
+			E[0][j]=E[1][j];
 			}
 		}
 	break;
@@ -104,6 +121,8 @@ void outflow(int imax, int jmax, double** U, double** V, int c){
 		for (j=1; j<=jmax; j++){
 			U[imax][j]=U[imax-1][j];				/* set the normal derivative of u to zero */
 			V[imax+1][j] = V[imax][j];				/* set the normal derivative of v to zero */
+			K[imax+1][j]=K[imax][j];
+			E[imax+1][j]=E[imax][j];
 			}
 		}
 	break;
@@ -111,6 +130,8 @@ void outflow(int imax, int jmax, double** U, double** V, int c){
 		for (i=1; i<=imax; i++){
 			U[i][0]=U[i][1];				/* set the normal derivative of u to zero */
 			V[i][0] = V[i][1];				/* set the normal derivative of v to zero */
+			K[i][0]=K[i][1];
+			E[i][0]=E[i][1];
 			}
 
 		}
@@ -119,8 +140,9 @@ void outflow(int imax, int jmax, double** U, double** V, int c){
 		for (i=1; i<=imax; i++){
 			U[i][jmax+1]=U[i][jmax];				/* set the normal derivative of u to zero */
 			V[i][jmax] = V[i][jmax-1];				/* set the normal derivative of v to zero */
+			K[i][jmax+1]=K[i][jmax];
+			E[i][jmax+1]=E[i][jmax];
 			}
-
 		}
 	break;
 	}
@@ -133,6 +155,8 @@ void boundaryvalues(
   int jmax,
   double **U,
   double **V,
+  double **K,
+  double **E,
   int *b, 
   int **Flag )
 {
@@ -145,78 +169,95 @@ void boundaryvalues(
 		 * inflow treated separately
 		 * */
 		switch(bound_now){
-		case 1: no_slip( imax, jmax, U, V, c);
+		case 1: no_slip( imax, jmax, U, V, K, E, c);
 		break;
-		case 3: outflow( imax, jmax, U, V, c);
+		case 3: outflow( imax, jmax, U, V, K, E, c);
 		break;
-		default: free_slip( imax, jmax, U, V, c);
+		default: free_slip( imax, jmax, U, V, K, E, c);
 		break;
 		}
 	}
 	
 	/* Boundary conditions for the obstacle cells */
-	for( i = 1; i <= imax; i++ ){
-	    for( j = 1; j <= jmax; j++ ){
-		if( Flag[i][j] < C_F ){
-		      /* Boundary conditions for obstacles with Northern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_N ) == B_N ){
-			  V[ i ][ j ] = 0; 
-			  U[ i ][ j ] = -U[ i ][ j+1 ];
-			  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
-		      }
-		      /* Boundary conditions for obstacles with Southern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_S ) == B_S ){
-			  V[ i ][ j-1 ] = 0; 
-			  U[ i ][ j ] = -U[ i ][ j-1 ];
-			  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
-		      }
-		      /* Boundary conditions for obstacles with Western fluid cell */
-		      if( ( Flag[ i ][ j ] & B_W ) == B_W ){
-			  U[ i-1 ][ j ] = 0; 
-			  V[ i ][ j ] = -V[ i-1 ][ j ];
-			  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
-		      }
-		      /* Boundary conditions for obstacles with Eastern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_E ) == B_E ){
-			  U[ i ][ j ] = 0; 
-			  V[ i ][ j ] = -V[ i+1 ][ j ];
-			  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
-		      }
-		      
-		      /* Boundary conditions for obstacles with North-Eastern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
-			  U[ i ][ j ] = 0; 
-			  V[ i ][ j ] = 0;
-			  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
-			  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
-		      }
-		      
-		      /* Boundary conditions for obstacles with North-Western fluid cell */
-		      if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
-			  U[ i-1 ][ j ] = 0; 
-			  V[ i ][ j ] = 0;
-			  U[ i ][ j ] = -U[ i ][ j+1 ];
-			  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
-		      }
-		      
-		      /* Boundary conditions for obstacles with South-Eastern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
-			  U[ i ][ j ] = 0; 
-			  V[ i ][ j-1 ] = 0;
-			  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
-			  V[ i ][ j ] = -V[ i+1 ][ j ];
-		      }
-		      
-		      /* Boundary conditions for obstacles with South-Western fluid cell */
-		      if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
-			  U[ i-1 ][ j ] = 0; 
-			  V[ i ][ j-1 ] = 0;
-			  U[ i ][ j ] = -U[ i ][ j-1 ];
-			  V[ i ][ j ] = -V[ i-1 ][ j ];
-		      }
-		}
-	    }
-	}
+	for( i = 1; i <= imax; i++ )
+	    for( j = 1; j <= jmax; j++ )
+			if( Flag[i][j] < C_F ){
+				  /* Boundary conditions for obstacles with North-Eastern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
+					  U[ i ][ j ] = .0;
+					  V[ i ][ j ] = .0;
+					  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
+					  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
+					  K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j+1 ] );
+			 		  E[ i ][ j ] = 0.5*( E[ i+1 ][ j ] + E[ i ][ j+1 ] );
+				  } else
+
+				  /* Boundary conditions for obstacles with North-Western fluid cell */
+				  if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
+					  U[ i-1 ][ j ] = .0;
+					  V[ i ][ j ] = .0;
+					  U[ i ][ j ] = -U[ i ][ j+1 ];
+					  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
+					  K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j+1 ] );
+					  E[ i ][ j ] = 0.5*( E[ i-1 ][ j ] + E[ i ][ j+1 ] );
+				  } else
+
+				  /* Boundary conditions for obstacles with South-Eastern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
+					  U[ i ][ j ] = .0;
+					  V[ i ][ j-1 ] = .0;
+					  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
+					  V[ i ][ j ] = -V[ i+1 ][ j ];
+					  K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j-1 ] );
+					  E[ i ][ j ] = 0.5*( E[ i+1 ][ j ] + E[ i ][ j-1 ] );
+				  } else
+
+				  /* Boundary conditions for obstacles with South-Western fluid cell */
+				  if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
+					  U[ i-1 ][ j ] = .0;
+					  V[ i ][ j-1 ] = .0;
+					  U[ i ][ j ] = -U[ i ][ j-1 ];
+					  V[ i ][ j ] = -V[ i-1 ][ j ];
+					  K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j-1 ] );
+					  E[ i ][ j ] = 0.5*( E[ i-1 ][ j ] + E[ i ][ j-1 ] );
+				  } else
+
+
+				  /* Boundary conditions for obstacles with Northern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+					  V[ i ][ j ] = .0;
+					  U[ i ][ j ] = -U[ i ][ j+1 ];
+					  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
+					  K[ i ][ j ] = -K[ i ][ j+1 ];
+					  E[ i ][ j ] = E[ i ][ j+1 ];
+				  } else
+				  /* Boundary conditions for obstacles with Southern fluid cell */
+			  if(( Flag[ i ][ j ] & B_S ) == B_S ){
+					  V[ i ][ j-1 ] = .0;
+					  U[ i ][ j ] = -U[ i ][ j-1 ];
+					  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
+					  K[ i ][ j ] = -K[ i ][ j-1 ];
+			 		  E[ i ][ j ] = E[ i ][ j-1 ];
+				  }
+				  /* Boundary conditions for obstacles with Western fluid cell */
+				  if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+					  U[ i-1 ][ j ] = .0;
+					  V[ i ][ j ] = -V[ i-1 ][ j ];
+					  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
+					  K[ i ][ j ] = -K[ i-1 ][ j ];
+			 		  E[ i ][ j ] = E[ i-1 ][ j ];
+				  } else
+				  /* Boundary conditions for obstacles with Eastern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+					  U[ i ][ j ] = .0;
+					  V[ i ][ j ] = -V[ i+1 ][ j ];
+					  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
+					  K[ i ][ j ] = -K[ i+1 ][ j ];
+					  E[ i ][ j ] = E[ i+1 ][ j ];
+				  }
+
+
+			}
 }
 
 
@@ -236,8 +277,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 		for (j=1; j<=jmax; j++){
 			U[0][j]=1.0;
 			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-			eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-			k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+			eps[0][j]=2.0*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+			k[0][j]=2.0*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
 
 		}
 	}
@@ -246,8 +287,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 			for (j=1; j<=jmax; j++){
 				U[0][j]= 1.0;
 				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-				eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-				k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+				eps[0][j]=2.*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+				k[0][j]=2.*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
 			}
 		}
 		else{
@@ -258,13 +299,15 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 				for (j = 1; j<=jmax/2; j++){
 						 	U[0][j]= 0.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
+							eps[0][j] = -eps[1][j];
+							k[0][j] = -k[1][j];
 					}
 
 				for (j = (jmax/2+1); j<=jmax; j++){
 						 	U[0][j]= 1.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							eps[0][j]=2*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-							k[0][j]=2*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+							eps[0][j]=2.*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+							k[0][j]=2.*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
 						}
 			}
 			else{
@@ -274,107 +317,4 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 	}
 
 }
-
-void newmann_k_eps(int imax, int jmax, double** k, int c){
-
-	int i,j;
-
-		switch (c){
-		case 0:{	/* left boundary */
-			for (j=1; j<=jmax; j++){
-				k[0][j]=k[1][j];				/* 	set the normal derivative of k to zero. Remark: if we want to set
-				 	 	 	 	 	 	 	 	 *	them to something different from 0: change RHS
-				 	 	 	 	 	 	 	 	 **/
-				}
-			}
-		break;
-		case 1:{	/* right boundary */
-			for (j=1; j<=jmax; j++){
-				k[imax+1][j]=k[imax][j];		/* 	set the normal derivative of k to zero. Remark: if we want to set
-												 *	them to something different from 0: change RHS
-												 **/
-				}
-			}
-		break;
-		case 2:{	/* bottom boundary */
-			for (i=1; i<=imax; i++){
-				k[i][0]=k[i][1];				/* 	set the normal derivative of k to zero. Remark: if we want to set
-												 *	them to something different from 0: change RHS
-												 **/
-			}
-
-			}
-		break;
-		case 3:{	/* top boundary */
-			for (i=1; i<=imax; i++){
-				k[i][jmax+1]=k[i][jmax];			/* 	set the normal derivative of k to zero. Remark: if we want to set
-													 *	them to something different from 0: change RHS
-													 **/
-			}
-
-			}
-		break;
-		}
-
-}
-
-
-void boundaryvalues_k_eps(int imax, int jmax, double** k,int* boundaries,int** Flag){
-		int i, j;
-		int c;
-
-		for( c = 0; c < 4; c++ ){
-			/* setting everything to newmann (homogeneous)
-			 * inflow (Dirichlet) treated separately
-			 * */
-			newmann_k_eps( imax, jmax, k, c);
-			}
-
-
-/* Boundary conditions for the obstacle cells for k or eps (the same of the pressure) */
-   for( i = 1; i <= imax; i++ ){
- 	for( j = 1; j <= jmax; j++ ){
- 	    if( Flag[i][j] < C_F ){
- 		/* Boundary conditions for obstacles with Northern fluid cell */
- 		if( ( Flag[ i ][ j ] & B_N ) == B_N ){
- 		    k[ i ][ j ] = k[ i ][ j+1 ];
- 		}
- 		/* Boundary conditions for obstacles with Southern fluid cell */
- 		if( ( Flag[ i ][ j ] & B_S ) == B_S ){
- 		    k[ i ][ j ] = k[ i ][ j-1 ];
- 		}
- 		/* Boundary conditions for obstacles with Western fluid cell */
- 		if( ( Flag[ i ][ j ] & B_W ) == B_W ){
- 		    k[ i ][ j ] = k[ i-1 ][ j ];
- 		}
- 		/* Boundary conditions for obstacles with Eastern fluid cell */
- 		if( ( Flag[ i ][ j ] & B_E ) == B_E ){
- 		    k[ i ][ j ] = k[ i+1 ][ j ];
- 		}
-
- 		/* Boundary conditions for obstacles with North-Eastern fluid cell */
- 		if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
- 		    k[ i ][ j ] = 0.5*( k[ i+1 ][ j ] + k[ i ][ j+1 ] );
- 		}
-
- 		/* Boundary conditions for obstacles with North-Western fluid cell */
- 		if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
- 		    k[ i ][ j ] = 0.5*( k[ i-1 ][ j ] + k[ i ][ j+1 ] );				/* is the mean still acceptable?? */
- 		}
-
- 		/* Boundary conditions for obstacles with South-Eastern fluid cell */
- 		if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
- 		    k[ i ][ j ] = 0.5*( k[ i+1 ][ j ] + k[ i ][ j-1 ] );				/* is the mean still acceptable?? */
- 		}
-
- 		/* Boundary conditions for obstacles with South-Western fluid cell */
- 		if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
- 		    k[ i ][ j ] = 0.5*( k[ i-1 ][ j ] + k[ i ][ j-1 ] );				/* is the mean still acceptable?? */
- 		}
- 	    }
- 	}
-    }
-
-}
-
 
