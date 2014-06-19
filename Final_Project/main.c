@@ -62,7 +62,7 @@ int main(int argc, char** args){
 	else
 		fname = PARAMF;
 
-	read_parameters(PARAMF, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &K, &E, &cn, &ce, &c1, &c2 );
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &K, &E, &cn, &ce, &c1, &c2 );
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
