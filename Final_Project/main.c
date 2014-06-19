@@ -62,7 +62,7 @@ int main(int argc, char** args){
 	else
 		fname = PARAMF;
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &K, &E, &cn, &ce, &c1, &c2 );
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &K, &E, &cn, &ce, &c1, &c2);
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -146,6 +146,9 @@ int main(int argc, char** args){
 	free_matrix(U,0,imax+1,0,jmax+1);
 	free_matrix(V,0,imax+1,0,jmax+1);
 	free_matrix(P,0,imax+1,0,jmax+1);
+	free_matrix(KA,0,imax+1,0,jmax+1);
+	free_matrix(EP,0,imax+1,0,jmax+1);
+
 
 	free_matrix(F,0,imax,0,jmax);
 	free_matrix(G,0,imax,0,jmax);

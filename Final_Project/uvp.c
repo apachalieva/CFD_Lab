@@ -85,8 +85,27 @@ inline double visc_corner(double **k, double **e, double nu, double cn, double d
 	return ( visc(k,e,nu,cn,delta, i+1, j+1) + visc(k,e,nu,cn,delta, i, j+1) + visc(k,e,nu,cn,delta, i+1, j) + visc(k,e,nu,cn,delta, i, j) ) / 4.0;
 }
 
-inline double dvdudxdx(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dy, double alpha){
-	return visc(k,e,nu,cn,delta, i+1, j) * (u[i+1][j] - u[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (u[i][j] - u[i-1][j]);
+inline double dndudxdx(double **k, double **e, double nu, double cn, double delta, double **u, int i, int j, double dx){
+	return (visc(k,e,nu,cn,delta, i+1, j) * (u[i+1][j] - u[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (u[i][j] - u[i-1][j])) / SQ(dx);
+}
+
+inline double dndvdydy(double **k, double **e, double nu, double cn, double delta, double **v, int i, int j, double dy){
+	return (visc(k,e,nu,cn,delta, i, j+1) * (v[i][j+1] - v[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (v[i][j] - v[i][j-1])) / SQ(dy);
+}
+
+
+inline double dndudypdvdxdy(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dx, double dy){
+	return (
+			  visc_corner(k,e,nu,cn,delta, i,j  )  * ( (u[i][j+1] - u[i][j  ])/dy + (v[i+1][j  ] - v[i][j  ])/dx )
+			- visc_corner(k,e,nu,cn,delta, i,j-1)  * ( (u[i][j  ] - u[i][j-1])/dy + (v[i+1][j-1] - v[i][j-1])/dx )
+							) /  dy;
+}
+
+inline double dndudypdvdxdx(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dx, double dy){
+	return (
+			  visc_corner(k,e,nu,cn,delta, i   ,j)  * ( (u[i  ][j+1] - u[i  ][j  ])/dy + (v[i+1][j  ] - v[i  ][j  ])/dx )
+			- visc_corner(k,e,nu,cn,delta, i-1,j )  * ( (u[i-1][j+1] - u[i-1][j  ])/dy + (v[i  ][j  ] - v[i-1][j  ])/dx )
+							) /  dx;
 }
 
 
@@ -103,7 +122,12 @@ void calculate_fg(
   double **U,
   double **V,
   double **F,
-  double **G, 
+  double **G,
+  double **K,
+  double **E,
+  double nu,
+  double cn,
+  double delta,
   int **Flag
 ){
 	int i,j;
@@ -172,14 +196,24 @@ void calculate_fg(
 		for(j=1; j<=jmax; j++)
 			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F)
 				F[i][j] = U[i][j] + dt * (
-						(d2dx(U,i,j,dx) + d2dy(U,i,j,dy))/Re - du2dx(U, i, j, dx, alpha) - duvdy(U,V,i,j,dy, alpha) + GX
+						2.0 * dndudxdx(K, E, nu, cn, delta, U, i, j, dx)
+						+ dndudypdvdxdy(K, E, nu, cn, delta, U, V, i, j, dx, dy)
+						- 2.0 * ddx(K,i,j,dy) / 3.0
+						- du2dx(U, i, j, dx, alpha)
+						- duvdy(U,V,i,j,dy, alpha)
+						+ GX
 						);
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
 			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F)
 				G[i][j] = V[i][j] + dt * (
-						(d2dx(V,i,j,dx) + d2dy(V,i,j,dy))/Re - duvdx(U, V, i, j, dx, alpha) - dv2dy(V,i,j,dy, alpha) + GY
+						dndudypdvdxdx(K, E, nu, cn, delta, U, V, i, j, dx, dy)
+						+ 2.0 * dndvdydy(K, E, nu, cn, delta, U, i, j, dy)
+						- 2.0 * ddx(K,i,j,dx) / 3.0
+						- duvdx(U,V,i,j,dx, alpha)
+						- dv2dy(U, i, j, dx, alpha)
+						+ GY
 						);
 
 }
