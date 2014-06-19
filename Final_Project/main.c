@@ -62,7 +62,7 @@ int main(int argc, char** args){
 	else
 		fname = PARAMF;
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &K, &E, &cn, &ce, &c1, &c2 );
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &K, &E, &cn, &ce, &c1, &c2);
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -103,8 +103,14 @@ int main(int argc, char** args){
 		if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 
 		boundaryvalues( imax, jmax, U, V, boundaries, Flag );
-		/* special inflow boundaries */
-		spec_boundary_val( problem, imax, jmax, U, V, Re, dp, ylength);
+
+		/* BC for k and epsilon */
+		/* Problem: which BC impose?? the same type of U and V?? */
+		boundaryvalues_k_eps(imax, jmax, KA, boundaries, Flag);
+		boundaryvalues_k_eps(imax, jmax, EP, boundaries, Flag);
+
+		/* special inflow boundaries, including k and eps */
+		spec_boundary_val( problem, imax, jmax, U, V, KA, EP, Re, dp, ylength);
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag );
@@ -146,6 +152,9 @@ int main(int argc, char** args){
 	free_matrix(U,0,imax+1,0,jmax+1);
 	free_matrix(V,0,imax+1,0,jmax+1);
 	free_matrix(P,0,imax+1,0,jmax+1);
+	free_matrix(KA,0,imax+1,0,jmax+1);
+	free_matrix(EP,0,imax+1,0,jmax+1);
+
 
 	free_matrix(F,0,imax,0,jmax);
 	free_matrix(G,0,imax,0,jmax);
