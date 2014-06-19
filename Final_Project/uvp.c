@@ -73,8 +73,12 @@ inline double f2(double **k, double **e, double nu, double delta, int i, int j){
 	return 1 - exp( - SQ( Rt(k,e,nu,i,j) ) );
 }
 
+inline double visc_t(double **k, double **e, double nu, double cn, double delta, int i, int j){
+	return cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
+}
+
 inline double visc(double **k, double **e, double nu, double cn, double delta, int i, int j){
-	return nu + cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
+	return nu + visc_t(k,e,nu,cn,delta,i,j);
 }
 
 inline double visc_corner(double **k, double **e, double nu, double cn, double delta, int i, int j){
