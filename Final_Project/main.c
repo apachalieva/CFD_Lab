@@ -44,7 +44,7 @@
  * - calculate_uv() Calculate the velocity at the next time step.
  */
 int main(int argc, char** args){
-	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res,dp;
+	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res, dp, nu;
 	double **U, **V, **P, **F, **G, **RS;
 	double **K;					/* turbulent kinetic energy k */
 	double **E; 					/* dissipation rate epsilon */
@@ -57,10 +57,8 @@ int main(int argc, char** args){
 
 	int **Flag;			/* Flagflield matrix */
 
-	if(argc>=2)
-		fname=args[1];
-	else
-		fname = PARAMF;
+	if(argc>=2) 	fname=args[1];
+	else 			fname = PARAMF;
 
 	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2);
 	/* setting of the problem */
@@ -99,6 +97,8 @@ int main(int argc, char** args){
 	n=0;
 	step=0;
 
+	nu=1.;
+
 	while( t <= t_end ){
 		if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 
@@ -107,10 +107,10 @@ int main(int argc, char** args){
 		/* special inflow boundaries, including k and eps */
 		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, ylength);
 
-		comp_KAEP(U, V, K, E, Flag, imax, jmax, dt, dx, dy, GX, GY, Re, alpha);
+		comp_KAEP(Re, nu, cn, ce, c1, c2, 1, alpha, dt, dx, dy, imax, jmax, U, V, K, E, GX, GY, Flag);
 
 		/* calculate new values for F and G */
-		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, 1, cn, 1, Flag );
+		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, 1, Flag );
 		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
 
