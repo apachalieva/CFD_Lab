@@ -21,11 +21,16 @@ inline double ddx(double **m, int i, int j, double dx){
 	return (m[i+1][j] - m[i][j]) / dx;
 }
 
+/* forward difference approximation of the first derivative in y */
+inline double ddy(double **m, int i, int j, double dy){
+	return (m[i][j+1] - m[i][j]) / dy;
+}
+
 /* approximation of the first derivative of the square of u in x */
 inline double du2dx(double **m, int i, int j, double dx, double alpha){
 	return (
 			SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
-			+ alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
+			+   * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
 	                       )/dx/4.0;
 }
 
@@ -57,12 +62,12 @@ inline double Rt(double **k, double **e, double nu, int i, int j){
 	return SQ(k[i][j]) / nu / e[i][j];
 }
 
-inline double Rd(double **k, double **e, double nu, double delta, int i, int j){
+inline double Rd(double **k, double nu, double delta, int i, int j){
 	return sqrt(k[i][j]) * delta / nu;
 }
 
 inline double fnu(double **k, double **e, double nu, double delta, int i, int j){
-	return SQ( 1-exp( -0.0165 * Rd(k,e,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );
+	return SQ( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );
 }
 
 inline double f1(double **k, double **e, double nu, double delta, int i, int j){
@@ -198,7 +203,7 @@ void calculate_fg(
 				F[i][j] = U[i][j] + dt * (
 						2.0 * dndudxdx(K, E, nu, cn, delta, U, i, j, dx)
 						+ dndudypdvdxdy(K, E, nu, cn, delta, U, V, i, j, dx, dy)
-						- 2.0 * ddx(K,i,j,dy) / 3.0
+						- 2.0 * ddx(K,i,j,dx) / 3.0
 						- du2dx(U, i, j, dx, alpha)
 						- duvdy(U,V,i,j,dy, alpha)
 						+ GX
@@ -209,10 +214,10 @@ void calculate_fg(
 			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F)
 				G[i][j] = V[i][j] + dt * (
 						dndudypdvdxdx(K, E, nu, cn, delta, U, V, i, j, dx, dy)
-						+ 2.0 * dndvdydy(K, E, nu, cn, delta, U, i, j, dy)
-						- 2.0 * ddx(K,i,j,dx) / 3.0
+						+ 2.0 * dndvdydy(K, E, nu, cn, delta, V, i, j, dy)
+						- 2.0 * ddy(K,i,j,dy) / 3.0
 						- duvdx(U,V,i,j,dx, alpha)
-						- dv2dy(U, i, j, dx, alpha)
+						- dv2dy(V, i, j, dy, alpha)
 						+ GY
 						);
 
