@@ -91,11 +91,15 @@ void init_uvp(
   double UI,
   double VI,
   double PI,
+  double KI,
+  double EI,
   int imax,
   int jmax,
   double **U,
   double **V,
   double **P,
+  double **K,
+  double **E,
   int **Flagfield,
   char* problem
 ){
@@ -111,6 +115,8 @@ void init_uvp(
 				U[i][j] =  IS_FLUID(Flagfield[i][j]) * UI;
 				V[i][j] =  IS_FLUID(Flagfield[i][j]) * VI;
 				P[i][j] =  IS_FLUID(Flagfield[i][j]) * PI;
+				K[i][j] =  IS_FLUID(Flagfield[i][j]) * KI;
+				E[i][j] =  IS_FLUID(Flagfield[i][j]) * EI;
 		}
 
 	if(strcmp(problem, "step") == 0)

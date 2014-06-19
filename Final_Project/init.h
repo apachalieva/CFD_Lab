@@ -63,8 +63,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     int *b, 			/* vector for boundaries */
                     double *dp,			/* dp/dx gradient of pressure */
                     int *p,
-        		    double *K,	/* kinetic energy intial value */
-        		    double *E,	/* dissipation rate initial value */
+        		    double *KI,	/* kinetic energy intial value */
+        		    double *EI,	/* dissipation rate initial value */
         		    double *cn,	/* turbolent eddy viscosity */
         		    double *ce,	/* turbolent modelling constants */
         		    double *c1,/* turbolent modelling constants */
@@ -79,11 +79,15 @@ void init_uvp(
   double UI,
   double VI,
   double PI,
+  double KI,
+  double EI,
   int imax,
   int jmax,
   double **U,
   double **V,
   double **P,
+  double **K,
+  double **E,
   int** Flagfield,
   char* problem
 );

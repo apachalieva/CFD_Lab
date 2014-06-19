@@ -46,9 +46,9 @@
 int main(int argc, char** args){
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res,dp;
 	double **U, **V, **P, **F, **G, **RS;
-	double **KA;					/* turbulent kinetic energy k */
-	double **EP; 					/* dissipation rate epsilon */
-	double K, E, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
+	double **K;					/* turbulent kinetic energy k */
+	double **E; 					/* dissipation rate epsilon */
+	double KI, EI, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
 	int n, step, it, imax, jmax, itermax, pb;
 	int fluid_cells;		/* Number of fluid cells in our geometry */
 	char problem[10];		/* Problem name, file name */
@@ -62,7 +62,7 @@ int main(int argc, char** args){
 	else
 		fname = PARAMF;
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &K, &E, &cn, &ce, &c1, &c2);
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2);
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -89,11 +89,11 @@ int main(int argc, char** args){
 	G = matrix ( 0 , imax , 0 , jmax );
 	RS = matrix ( 0 , imax , 0 , jmax );
 
-	KA=matrix ( 0 , imax+1 , 0 , jmax+1 );
-	EP=matrix ( 0 , imax+1 , 0 , jmax+1 ); 
+	K=matrix ( 0 , imax+1 , 0 , jmax+1 );
+	E=matrix ( 0 , imax+1 , 0 , jmax+1 );
 	
 	init_flag( problem, imax, jmax, &fluid_cells, Flag );
-	init_uvp(UI, VI, PI, imax, jmax, U, V, P, Flag, problem);
+	init_uvp(UI, VI, PI, KI, EI, imax, jmax, U, V, P, K, E, Flag, problem);
 
 	t=.0;
 	n=0;
@@ -102,15 +102,10 @@ int main(int argc, char** args){
 	while( t <= t_end ){
 		if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 
-		boundaryvalues( imax, jmax, U, V, boundaries, Flag );
-
-		/* BC for k and epsilon */
-		/* Problem: which BC impose?? the same type of U and V?? */
-		boundaryvalues_k_eps(imax, jmax, KA, boundaries, Flag);
-		boundaryvalues_k_eps(imax, jmax, EP, boundaries, Flag);
+		boundaryvalues( imax, jmax, U, V, K, E, boundaries, Flag );
 
 		/* special inflow boundaries, including k and eps */
-		spec_boundary_val( problem, imax, jmax, U, V, KA, EP, Re, dp, ylength);
+		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, ylength);
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag );
@@ -152,8 +147,8 @@ int main(int argc, char** args){
 	free_matrix(U,0,imax+1,0,jmax+1);
 	free_matrix(V,0,imax+1,0,jmax+1);
 	free_matrix(P,0,imax+1,0,jmax+1);
-	free_matrix(KA,0,imax+1,0,jmax+1);
-	free_matrix(EP,0,imax+1,0,jmax+1);
+	free_matrix(K,0,imax+1,0,jmax+1);
+	free_matrix(E,0,imax+1,0,jmax+1);
 
 
 	free_matrix(F,0,imax,0,jmax);
