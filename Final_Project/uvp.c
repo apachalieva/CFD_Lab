@@ -30,7 +30,7 @@ inline double ddy(double **m, int i, int j, double dy){
 inline double du2dx(double **m, int i, int j, double dx, double alpha){
 	return (
 			SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
-			+   * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
+			+  alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
 	                       )/dx/4.0;
 }
 
@@ -164,15 +164,6 @@ inline double dVkedy( double **v, double **ke, double dy, double gamma, int i, i
 	return (v[i][j]*(ke[i][j]+ke[i][j+1])/2 - v[i][j-1]*(ke[i][j-1]+ke[i][j])/2)/dy + 
 	       gamma*(abs(v[i][j])*(ke[i][j]-ke[i][j+1])/2 - abs(v[i][j-1])*(ke[i][j-1]-ke[i][j])/2)/dy;
 }
-
-
-
-
-
-
-
-
-
 
 void calculate_fg(
   double Re,
