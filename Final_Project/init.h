@@ -62,7 +62,14 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     double *dt_value,           /* time for output */
                     int *b, 			/* vector for boundaries */
                     double *dp,			/* dp/dx gradient of pressure */
-                    int *p);			/* specification of the problem */
+                    int *p,
+        		    double *K,	/* kinetic energy intial value */
+        		    double *E,	/* dissipation rate initial value */
+        		    double *cn,	/* turbolent eddy viscosity */
+        		    double *ce,	/* turbolent modelling constants */
+        		    double *c1,/* turbolent modelling constants */
+        		    double *c2/* turbolent modelling constants */
+);			/* specification of the problem */
 
 /**
  * The arrays U,V and P are initialized to the constant values UI, VI and PI on

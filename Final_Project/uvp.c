@@ -4,6 +4,7 @@
 
 
 #define SQ(a) ((a)*(a))
+#define CB(a) ((a)*(a)*(a))
 
 /* central difference approximation of the second derivative in x */
 inline double d2dx(double **m, int i, int j, double dx){
@@ -49,6 +50,39 @@ inline double duvdy(double **u, double **v, int i, int j, double dy, double alph
 			(u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i][j-1]+u[i][j]) * (v[i][j-1]+v[i+1][j-1])
 			+ alpha * ( fabs(v[i][j]+v[i+1][j]) * (u[i][j]-u[i][j+1]) -  fabs(v[i][j-1]+v[i+1][j-1]) * (u[i][j-1]-u[i][j]) )
 	                       )/dy/4.0;
+}
+
+
+inline double Rt(double **k, double **e, double nu, int i, int j){
+	return SQ(k[i][j]) / nu / e[i][j];
+}
+
+inline double Rd(double **k, double **e, double nu, double delta, int i, int j){
+	return sqrt(k[i][j]) * delta / nu;
+}
+
+inline double fnu(double **k, double **e, double nu, double delta, int i, int j){
+	return SQ( 1-exp( -0.0165 * Rd(k,e,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );
+}
+
+inline double f1(double **k, double **e, double nu, double delta, int i, int j){
+	return 1 + (0.05 / fnu(k,e,nu,delta,i,j) );
+}
+
+inline double f2(double **k, double **e, double nu, double delta, int i, int j){
+	return 1 - exp( - SQ( Rt(k,e,nu,i,j) ) );
+}
+
+inline double visc(double **k, double **e, double nu, double cn, double delta, int i, int j){
+	return nu + cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
+}
+
+inline double visc_corner(double **k, double **e, double nu, double cn, double delta, int i, int j){
+	return ( visc(k,e,nu,cn,delta, i+1, j+1) + visc(k,e,nu,cn,delta, i, j+1) + visc(k,e,nu,cn,delta, i+1, j) + visc(k,e,nu,cn,delta, i, j) ) / 4.0;
+}
+
+inline double dvdudxdx(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dy, double alpha){
+	return visc(k,e,nu,cn,delta, i+1, j) * (u[i+1][j] - u[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (u[i][j] - u[i-1][j]);
 }
 
 

@@ -29,6 +29,7 @@ int read_parameters( const char *szFileName,       /* name of the file */
 		    double *ce,	/* turbolent modelling constants */
 		    double *c1,
 		    double *c2
+		    )
 {
    READ_DOUBLE( szFileName, *xlength );
    READ_DOUBLE( szFileName, *ylength );

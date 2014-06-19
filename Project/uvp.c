@@ -78,7 +78,6 @@ inline double f2(dobule **k, double **e, double nu, double delta, int i, int j){
 	return 1 - exp( - SQ( Rt(k,e,nu,i,j) ) );
 }
 
-
 inline double visc(double nu, double** k, double** e, double cn){
 	return cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
 }
