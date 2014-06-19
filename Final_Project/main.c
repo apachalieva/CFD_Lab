@@ -107,8 +107,10 @@ int main(int argc, char** args){
 		/* special inflow boundaries, including k and eps */
 		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, ylength);
 
+		comp_KAEP(U, V, K, E, Flag, imax, jmax, dt, dx, dy, GX, GY, Re, alpha);
+
 		/* calculate new values for F and G */
-		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag );
+		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, 1, cn, 1, Flag );
 		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
 
