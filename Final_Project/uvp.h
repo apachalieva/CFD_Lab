@@ -109,4 +109,30 @@ void calculate_uv(
   int **Flag
 );
 
+
+void comp_KAEP( 
+  double Re, 
+  double nu,
+  double cn, 
+  double ce, 
+  double c1, 
+  double c2,
+  double delta,
+  double gamma,
+  double dt,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U, 
+  double **V, 
+  double **KA, 
+  double **EP, 
+  double GX, 
+  double GY, 
+  int **Flag 
+);
+
+
+
 #endif
