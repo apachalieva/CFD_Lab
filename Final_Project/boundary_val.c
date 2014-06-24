@@ -277,8 +277,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 		for (j=1; j<=jmax; j++){
 			U[0][j]=1.0;
 			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-			eps[0][j]=2.0*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-			k[0][j]=2.0*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+			eps[0][j]=2.0*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+			k[0][j]=2.0*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
 
 		}
 	}
@@ -287,8 +287,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 			for (j=1; j<=jmax; j++){
 				U[0][j]= 1.0;
 				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-				eps[0][j]=2.*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-				k[0][j]=2.*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+				eps[0][j]=2.*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+				k[0][j]=2.*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
 			}
 		}
 		else{
@@ -306,8 +306,8 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
 				for (j = (jmax/2+1); j<=jmax; j++){
 						 	U[0][j]= 1.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							eps[0][j]=2.*1.0-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-							k[0][j]=2.*1.0-k[1][j]; 				/* which value here?? 1.0 temporary*/
+							eps[0][j]=2.*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
+							k[0][j]=2.*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
 						}
 			}
 			else{
