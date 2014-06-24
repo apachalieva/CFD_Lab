@@ -41,7 +41,6 @@ void calculate_fg(
 		  double **E,
 		  double nu,
 		  double cn,
-		  double delta,
 		  int **Flag
 );
 
@@ -124,7 +123,6 @@ void comp_KAEP(
   double ce, 
   double c1, 
   double c2,
-  double delta,
   double gamma,
   double dt,
   double dx,

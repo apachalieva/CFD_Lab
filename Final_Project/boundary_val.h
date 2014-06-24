@@ -20,7 +20,7 @@ void boundaryvalues(
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax,double **U, double **V, double **K, double **E, double Re, double dp, double h);
+void spec_boundary_val( char* problem, int imax, int jmax,double **U, double **V, double **K, double **E, double Re, double dp, double cn, double ylength);
 
 #endif
 

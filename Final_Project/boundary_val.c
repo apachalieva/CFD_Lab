@@ -264,7 +264,7 @@ void boundaryvalues(
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double **k, double **eps, double Re, double dp, double h){
+void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **V, double **k, double **eps, double Re, double dp, double cn, double ylength){
 /* supposing the three different problems:
  * karman = Karman vortex street
  * shear = plane shear flow
@@ -272,49 +272,45 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
  * we deal with these problems
  */
 	int j;
-	if (strcmp(problem,"karman")==0){
+	double kin;
+	if (strcmp(problem,"karman")==0)
 		/* printf("setting the left boundary to velocity : u=1, v=0;\n"); */
 		for (j=1; j<=jmax; j++){
 			U[0][j]=1.0;
 			V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-			eps[0][j]=2.0*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-			k[0][j]=2.0*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
+			kin = 0.003*SQ(U[0][j]);
+			k[0][j]=2.*kin-k[1][j];
+			eps[0][j]=2.*cn*sqrt(kin*SQ(kin))/0.03/ylength-eps[1][j];
 
 		}
-	}
-	else{
-		if(strcmp(problem,"shear")==0){
+	else if(strcmp(problem,"shear")==0)
 			for (j=1; j<=jmax; j++){
 				U[0][j]= 1.0;
 				V[0][j]=-V[1][j]; 		/* setting the average equal to 0 */
-				eps[0][j]=2.*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-				k[0][j]=2.*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
+				kin = 0.003*SQ(U[0][j]);
+				k[0][j]=2.*kin-k[1][j];
+				eps[0][j]=2.*cn*sqrt(kin*SQ(kin))/0.03/ylength-eps[1][j];
 			}
-		}
-		else{
-			if(strcmp(problem,"step")==0){
+	else if(strcmp(problem,"step")==0){
 				 /* printf("setting the left boundary: lower half = step, upper half: u=1, v=0;\n"); */
 				if (jmax%2!=0)
 					printf("odd number of cells on the vertical boundary: asymmetric problem!");
+
 				for (j = 1; j<=jmax/2; j++){
 						 	U[0][j]= 0.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							eps[0][j] = -eps[1][j];
-							k[0][j] = -k[1][j];
+							kin = 0.003*SQ(U[0][j]);
+							k[0][j]=2.*kin-k[1][j];
+							eps[0][j]=2.*cn*sqrt(kin*SQ(kin))/0.03/ylength-eps[1][j];
 					}
 
 				for (j = (jmax/2+1); j<=jmax; j++){
 						 	U[0][j]= 1.0;
 							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							eps[0][j]=2.*.5-eps[1][j]; 			/* which value here?? 1.0 temporary*/
-							k[0][j]=2.*.5-k[1][j]; 				/* which value here?? 1.0 temporary*/
+							kin = 0.003*SQ(U[0][j]);
+							k[0][j]=2.*kin-k[1][j];
+							eps[0][j]=2.*cn*sqrt(kin*SQ(kin))/0.03/ylength-eps[1][j];
 						}
 			}
-			else{
-				/*printf("no particular problem selected\n");*/
-			}
-		}
-	}
-
 }
 

@@ -63,6 +63,8 @@ int main(int argc, char** args){
 	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2);
 
 	nu=1.0 / Re;
+	KI = 0.003 * SQ(UI);
+	EI = sqrt(KI*SQ(KI)) * cn / 0.03 / ylength;
 
 	/* setting of the problem */
 	switch (pb){
@@ -106,12 +108,12 @@ int main(int argc, char** args){
 		boundaryvalues( imax, jmax, U, V, K, E, boundaries, Flag );
 
 		/* special inflow boundaries, including k and eps */
-		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, ylength);
+		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, cn, ylength);
 
-		comp_KAEP(Re, nu, cn, ce, c1, c2, 1, alpha, dt, dx, dy, imax, jmax, U, V, K, E, GX, GY, Flag);
+		comp_KAEP(Re, nu, cn, ce, c1, c2, alpha, dt, dx, dy, imax, jmax, U, V, K, E, GX, GY, Flag);
 
 		/* calculate new values for F and G */
-		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, 1, Flag );
+		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, Flag );
 		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
 

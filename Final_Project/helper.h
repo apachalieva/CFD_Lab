@@ -53,6 +53,9 @@ extern clock_t last_timer_reset;
 #define B_NW	5 
 
 #define IS_FLUID(a) (((a)&C_F)==C_F?1:0)
+#define SQ(a) ((a)*(a))
+#define CB(a) ((a)*(a)*(a))
+#define MIN(a,b) ((a)<(b)?(a):(b))
 
 int min( int a, int b);	       
 int max( int a, int b);
