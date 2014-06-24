@@ -123,7 +123,7 @@ void comp_KAEP(
   double ce, 
   double c1, 
   double c2,
-  double gamma,
+  double alpha,
   double dt,
   double dx,
   double dy,
