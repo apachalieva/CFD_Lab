@@ -30,13 +30,8 @@ inline double ddy(double **m, int i, int j, double dy){
 inline double du2dx(double **m, int i, int j, double dx, double alpha){
 	return (
 			SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
-<<<<<<< HEAD
 			+  alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
             )/dx/4.0;
-=======
-			+ alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
-	                       )/dx/4.0;
->>>>>>> 6397ae42afd358b90a396e731bb455435e37753c
 }
 
 /* approximation of the first derivative of the square of v in y */
