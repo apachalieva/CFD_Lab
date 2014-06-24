@@ -129,9 +129,24 @@ inline double dvisctEP_dx( double **k, double **e, double nu, double cn, double 
 	         ((visc_t( k, e, nu, cn, delta, i-1, j )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i-1][j]) )/SQ(dx);
 }
 
+
 inline double dvisctEP_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
 	return ( ((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) - 
 	         ((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) )/SQ(dy);
+}
+
+inline double d_fnu_visctEP_dx( double **k, double **e, double nu, double cn, double delta, double dx, int i, int j ){
+	return ( 
+	       ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i+1, j ))/2)*((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i+1, j ))/2)*(e[i+1][j]-e[i][j]) - 
+	       ((fnu( k, e, nu, delta, i-1, j )+fnu( k, e, nu, delta, i, j ))/2)*((visc_t( k, e, nu, cn, delta, i-1, j )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i-1][j]) 
+	       )/SQ(dx);
+}
+
+inline double d_fnu_visctEP_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
+	return ( 
+	       ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i, j+1 ))/2)*((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) - 
+	       ((fnu( k, e, nu, delta, i, j-1 )+fnu( k, e, nu, delta, i, j ))/2)*((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) 
+	       )/SQ(dy);
 }
 
 inline double dUdx( double **u, double dx, int i, int j ){
@@ -381,8 +396,8 @@ void comp_KAEP(
 				KA[i][j] = KA[i][j] + dt*( dvisct_dx( KA, EP, nu, cn, delta, dx, i, j ) + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j ) 
 					   - dUkedx( U, KA, dx, gamma, i, j ) - dVkedy( V, KA, dy, gamma, i, j )
 				           + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )*gradU( U, V, dx, dy, i, j ) - EP[i][j]);
-				EP[i][j] = EP[i][j] + dt*((ce/cn)*fnu( KA, EP, nu, delta, i, j )*dvisctEP_dx( KA, EP, nu, cn, delta, dx, i, j ) 
-							+ (ce/cn)*fnu( KA, EP, nu, delta, i, j )*dvisctEP_dy( KA, EP, nu, cn, delta, dy, i, j ) 
+				EP[i][j] = EP[i][j] + dt*((ce/cn)*d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j ) 
+					                + (ce/cn)*d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j ) 
 				           - dUkedx( U, EP, dx, gamma, i, j ) - dVkedy( V, EP, dy, gamma, i, j ) 
 					   + ((c1*f1(KA, EP, nu, delta, i, j))/2)*KA[i][j]*gradU(U, V, dx, dy, i, j) - c2*f2( KA, EP, nu, delta, i, j )*SQ(EP[i][j])/KA[i][j]);
 			}
