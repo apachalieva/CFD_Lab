@@ -61,6 +61,9 @@ int main(int argc, char** args){
 	else 			fname = PARAMF;
 
 	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2);
+
+	nu=1.0 / Re;
+
 	/* setting of the problem */
 	switch (pb){
 		case 0:	strcpy(problem,"karman");
@@ -96,8 +99,6 @@ int main(int argc, char** args){
 	t=.0;
 	n=0;
 	step=0;
-
-	nu=1.;
 
 	while( t <= t_end ){
 		if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
