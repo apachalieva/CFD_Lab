@@ -43,6 +43,23 @@
  *   iteration loop the operation sor() is used.
  * - calculate_uv() Calculate the velocity at the next time step.
  */
+
+
+
+
+void has_nan(double **m, int imax, int jmax){
+	int i,j;
+
+	for(i=0; i<=imax+1; i++)
+			for(j=0; j<=jmax+1; j++){
+				if (m[i][j] != m[i][j])
+					printf("[%d, %d] NaN\n", i,j);
+				if (m[i][j] == INFINITY || m[i][j] == -1*INFINITY  )
+					printf("[%d, %d] Inf\n", i,j);
+			}
+}
+
+
 int main(int argc, char** args){
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res, dp, nu;
 	double **U, **V, **P, **F, **G, **RS;
@@ -107,10 +124,25 @@ int main(int argc, char** args){
 
 		boundaryvalues( imax, jmax, U, V, K, E, boundaries, Flag );
 
+		has_nan(U,imax,jmax);
+		has_nan(V,imax,jmax);
+		has_nan(K,imax,jmax);
+		has_nan(E,imax,jmax);
+
 		/* special inflow boundaries, including k and eps */
 		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, cn, ylength);
 
+		has_nan(U,imax,jmax);
+		has_nan(V,imax,jmax);
+		has_nan(K,imax,jmax);
+		has_nan(E,imax,jmax);
+
 		comp_KAEP(Re, nu, cn, ce, c1, c2, alpha, dt, dx, dy, imax, jmax, U, V, K, E, GX, GY, Flag);
+
+		has_nan(U,imax,jmax);
+		has_nan(V,imax,jmax);
+		has_nan(K,imax,jmax);
+		has_nan(E,imax,jmax);
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, Flag );

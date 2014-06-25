@@ -65,12 +65,13 @@ inline double get_delta(int i, int j, int imax, int jmax, double dx, double dy){
 		);
 }
 
-inline double Rd(double **k, double nu, double delta, int i, int j){
-	return sqrt(k[i][j]) * delta / nu;
+double Rd_d(double **k, double nu, double delta, int i, int j){
+	return sqrt(fabs(k[i][j])) * delta / nu;
 }
 
-inline double fnu(double **k, double **e, double nu, double delta, int i, int j){
-	return SQ( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );
+double fnu(double **k, double **e, double nu, double delta, int i, int j){
+	/*return SQ( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) ); */
+	return ( 1-exp( -0.0165 * Rd_d(k,nu,delta,i,j) ) )  *( 1-exp( -0.0165 * Rd_d(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );
 }
 
 inline double f1(double **k, double **e, double nu, double delta, int i, int j){
@@ -81,7 +82,7 @@ inline double f2(double **k, double **e, double nu, double delta, int i, int j){
 	return 1 - exp( - SQ( Rt(k,e,nu,i,j) ) );
 }
 
-inline double visc_t(double **k, double **e, double nu, double cn, double delta, int i, int j){
+double visc_t(double **k, double **e, double nu, double cn, double delta, int i, int j){
 	return cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
 }
 
@@ -132,7 +133,6 @@ inline double dvisctEP_dx( double **k, double **e, double nu, double cn, double 
 	         ((visc_t( k, e, nu, cn, delta, i-1, j )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i-1][j]) )/SQ(dx);
 }
 
-
 inline double dvisctEP_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
 	return ( ((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) - 
 	         ((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) )/SQ(dy);
@@ -175,13 +175,13 @@ inline double gradU( double **u, double **v, double dx, double dy, int i, int j 
 /* alpha [0, 1] determines a weighted average of discretizing with central differences and the donor-cell discretization */
 inline double dUkedx( double **u, double **ke, double dx, double alpha, int i, int j ){
 	return (u[i][j]*(ke[i][j]+ke[i+1][j])/2 - u[i-1][j]*(ke[i-1][j]+ke[i][j])/2)/dx + 
-	       alpha*(abs(u[i][j])*(ke[i][j]-ke[i+1][j])/2 - abs(u[i-1][j])*(ke[i-1][j]-ke[i][j])/2)/dx;
+	       alpha*(fabs(u[i][j])*(ke[i][j]-ke[i+1][j])/2 - fabs(u[i-1][j])*(ke[i-1][j]-ke[i][j])/2)/dx;
 }
 
 /* alpha [0, 1] determines a weighted average of discretizing with central differences and the donor-cell discretization */
 inline double dVkedy( double **v, double **ke, double dy, double alpha, int i, int j ){
 	return (v[i][j]*(ke[i][j]+ke[i][j+1])/2 - v[i][j-1]*(ke[i][j-1]+ke[i][j])/2)/dy + 
-	       alpha*(abs(v[i][j])*(ke[i][j]-ke[i][j+1])/2 - abs(v[i][j-1])*(ke[i][j-1]-ke[i][j])/2)/dy;
+	       alpha*(fabs(v[i][j])*(ke[i][j]-ke[i][j+1])/2 - fabs(v[i][j-1])*(ke[i][j-1]-ke[i][j])/2)/dy;
 }
 
 void calculate_fg(
@@ -404,13 +404,22 @@ void comp_KAEP(
 			{
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
-				KA[i][j] = KA[i][j] + dt*( dvisct_dx( KA, EP, nu, cn, delta, dx, i, j ) + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j ) 
-					   - dUkedx( U, KA, dx, alpha, i, j ) - dVkedy( V, KA, dy, alpha, i, j )
-				           + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )*gradU( U, V, dx, dy, i, j ) - EP[i][j]);
-				EP[i][j] = EP[i][j] + dt*((ce/cn)*d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j ) 
+				KA[i][j] = KA[i][j] + dt*(
+						dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
+						+ dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
+					    - dUkedx( U, KA, dx, alpha, i, j )
+					    - dVkedy( V, KA, dy, alpha, i, j )
+				        + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )
+				              * gradU( U, V, dx, dy, i, j )
+				        - EP[i][j]);
+
+
+				EP[i][j] = EP[i][j] + dt*(
+						(ce/cn)*d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
 					                + (ce/cn)*d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j ) 
-				           - dUkedx( U, EP, dx, alpha, i, j ) - dVkedy( V, EP, dy, alpha, i, j ) 
-					   + ((c1*f1(KA, EP, nu, delta, i, j))/2)*KA[i][j]*gradU(U, V, dx, dy, i, j) - c2*f2( KA, EP, nu, delta, i, j )*SQ(EP[i][j])/KA[i][j]);
+					                - dUkedx( U, EP, dx, alpha, i, j ) - dVkedy( V, EP, dy, alpha, i, j )
+					                + ((c1*f1(KA, EP, nu, delta, i, j))/2)*KA[i][j]*gradU(U, V, dx, dy, i, j)
+					                - c2*f2( KA, EP, nu, delta, i, j )*SQ(EP[i][j])/KA[i][j]);
 			}
-	
 }
+
