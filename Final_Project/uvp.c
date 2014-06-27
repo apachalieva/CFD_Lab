@@ -188,12 +188,14 @@ double d_fnu_visctEP_dy( double **k, double **e, double nu, double cn, double de
 	/*return (  ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i, j+1 ))/2)*((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) - ((fnu( k, e, nu, delta, i, j-1 )+fnu( k, e, nu, delta, i, j ))/2)*((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) )/SQ(dy); */
 
 	double c1 = ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i, j+1 ))/2);
-	double c2 = ((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2);
+	double c2 = ((visc2( k, e, nu, cn, delta, i, j )+visc2( k, e, nu, cn, delta, i, j+1 ))/2);
 
 	double c3 = ((fnu( k, e, nu, delta, i, j-1 )+fnu( k, e, nu, delta, i, j ))/2);
-	double c4 = ((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2);
+	double c4 = ((visc2( k, e, nu, cn, delta, i, j-1 )+visc2( k, e, nu, cn, delta, i, j ))/2);
 
 	double res = (  c1*c2*(e[i][j+1]-e[i][j]) - c3 *c4 *(e[i][j]-e[i][j-1]) )/(dy*dy);
+
+	/*printf("d_fnu_visctEP_dy ---- %d %d: %f %f %f %f %f \n", i, j, c1, c2, c3, c4, res);*/
 
 	return res;
 }
@@ -471,7 +473,7 @@ void comp_KAEP(
 			{
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
-				/*printf("KA-- %f %f %f %f %f %f %f %f %f %f \n", KA[i][j], dt,	dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
+				/*printf("KA-- %d %d: %f %f %f %f %f %f %f %f %f %f \n", i,j,KA[i][j], dt,	dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
 									, dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
 								    ,dUkedx( U, KA, dx, alpha, i, j )
 								    , dVkedy( V, KA, dy, alpha, i, j )
@@ -479,7 +481,8 @@ void comp_KAEP(
 							         ,gradU( U, V, dx, dy, i, j )
 							         , EP[i][j]
 							         , KA[i][j] + dt*( dvisct_dx( KA, EP, nu, cn, delta, dx, i, j ) + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )- dUkedx( U, KA, dx, alpha, i, j )- dVkedy( V, KA, dy, alpha, i, j ) + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )* gradU( U, V, dx, dy, i, j )- EP[i][j]));
-*/
+							         */
+
 
 				KA[i][j] = KA[i][j] + dt*(
 						dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )

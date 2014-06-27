@@ -194,8 +194,8 @@ void boundaryvalues(
 					  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
 					  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
 					  /*K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j+1 ] );*/
-					  K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j+1 ] ) + 0.0002;
-					  /*K[ i ][ j ] = 0.0001;*/
+					  /*K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j+1 ] ) + 0.0002;*/
+					  K[ i ][ j ] = 0.00001;
 			 		  E[ i ][ j ] = 0.5*( E[ i+1 ][ j ] + E[ i ][ j+1 ] );
 				  } else
 
@@ -205,8 +205,8 @@ void boundaryvalues(
 					  V[ i ][ j ] = .0;
 					  U[ i ][ j ] = -U[ i ][ j+1 ];
 					  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
-					  K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j+1 ] )+0.0002;
-					  /*K[ i ][ j ] = 0.0001;*/
+					  /*K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j+1 ] )+0.0002;*/
+					  K[ i ][ j ] = 0.00001;
 					  E[ i ][ j ] = 0.5*( E[ i-1 ][ j ] + E[ i ][ j+1 ] );
 				  } else
 
@@ -216,8 +216,8 @@ void boundaryvalues(
 					  V[ i ][ j-1 ] = .0;
 					  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
 					  V[ i ][ j ] = -V[ i+1 ][ j ];
-					  K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j-1 ] )+0.0002;
-					  /*K[ i ][ j ] = 0.0001;*/
+					  /*K[ i ][ j ] = -0.5*( K[ i+1 ][ j ] + K[ i ][ j-1 ] )+0.0002;*/
+					  K[ i ][ j ] = 0.00001;
 					  E[ i ][ j ] = 0.5*( E[ i+1 ][ j ] + E[ i ][ j-1 ] );
 				  } else
 
@@ -227,8 +227,8 @@ void boundaryvalues(
 					  V[ i ][ j-1 ] = .0;
 					  U[ i ][ j ] = -U[ i ][ j-1 ];
 					  V[ i ][ j ] = -V[ i-1 ][ j ];
-					  K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j-1 ] )+0.0002;
-					  /*K[ i ][ j ] = 0.0001;*/
+					  /*K[ i ][ j ] = -0.5*( K[ i-1 ][ j ] + K[ i ][ j-1 ] )+0.0002;*/
+					  K[ i ][ j ] = 0.00001;
 					  E[ i ][ j ] = 0.5*( E[ i-1 ][ j ] + E[ i ][ j-1 ] );
 				  } else
 
@@ -239,7 +239,7 @@ void boundaryvalues(
 					  U[ i ][ j ] = -U[ i ][ j+1 ];
 					  U[ i-1 ][ j ] = -U[ i-1 ][ j+1 ];
 					  /*K[ i ][ j ] = -K[ i ][ j+1 ];*/
-					  K[ i ][ j ] = 2*0.0001 -K[ i ][ j+1 ];
+					  K[ i ][ j ] = 0.00001;
 					  E[ i ][ j ] = E[ i ][ j+1 ];
 				  } else
 				  /* Boundary conditions for obstacles with Southern fluid cell */
@@ -248,7 +248,7 @@ void boundaryvalues(
 					  U[ i ][ j ] = -U[ i ][ j-1 ];
 					  U[ i-1 ][ j ] = -U[ i-1 ][ j-1 ];
 					  /*K[ i ][ j ] = -K[ i ][ j-1 ];*/
-					  K[ i ][ j ] = 0.0002 -K[ i ][ j-1 ];
+					  K[ i ][ j ] = 0.00001;
 			 		  E[ i ][ j ] = E[ i ][ j-1 ];
 				  }else
 				  /* Boundary conditions for obstacles with Western fluid cell */
@@ -257,7 +257,7 @@ void boundaryvalues(
 					  V[ i ][ j ] = -V[ i-1 ][ j ];
 					  V[ i ][ j-1 ] = -V[ i-1 ][ j-1 ];
 					  /*K[ i ][ j ] = -K[ i-1 ][ j ];*/
-					  K[ i ][ j ] = 0.0002 -K[ i-1 ][ j ];
+					  K[ i ][ j ] = 0.00001;
 			 		  E[ i ][ j ] = E[ i-1 ][ j ];
 				  } else
 				  /* Boundary conditions for obstacles with Eastern fluid cell */
@@ -266,7 +266,7 @@ void boundaryvalues(
 					  V[ i ][ j ] = -V[ i+1 ][ j ];
 					  V[ i ][ j-1 ] = -V[ i+1 ][ j-1 ];
 					  /*K[ i ][ j ] = -K[ i+1 ][ j ];*/
-					  K[ i ][ j ] = 0.0002 -K[ i+1 ][ j ];
+					  K[ i ][ j ] = 0.00001;
 					  E[ i ][ j ] = E[ i+1 ][ j ];
 				  }
 
