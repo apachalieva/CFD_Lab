@@ -6,6 +6,7 @@
 #include "sor.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #define PARAMF "cavity.dat"
 #define VISUAF "visual/sim"
@@ -54,7 +55,7 @@ void has_nan(double **m, int imax, int jmax){
 			for(j=0; j<=jmax+1; j++){
 				if (m[i][j] != m[i][j])
 					printf("[%d, %d] NaN\n", i,j);
-				if (m[i][j] == INFINITY || m[i][j] == -1*INFINITY  )
+				if (isinf(m[i][j]))
 					printf("[%d, %d] Inf\n", i,j);
 			}
 }
@@ -146,13 +147,19 @@ int main(int argc, char** args){
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, Flag );
+
+		has_nan(F,imax-1,jmax-1);
+		has_nan(G,imax-1,jmax-1);
+
 		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
+		has_nan(RS,imax-1,jmax-1);
 
 		it = 0;
 		res = 10000.0;
 		while( it < itermax && fabs(res) > eps ){
 			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res, problem, dp );
+			has_nan(P,imax,jmax);
 			it++;
 		}
 
@@ -162,6 +169,9 @@ int main(int argc, char** args){
 		    printf( "    WARNING: Maximum number of iterations reached.\n" );
 
 		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
+
+		has_nan(U,imax,jmax);
+		has_nan(V,imax,jmax);
 
 		t += dt;
 		n++;

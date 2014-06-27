@@ -435,7 +435,7 @@ void init_imatrix( int **m, int nrl, int nrh, int ncl, int nch, int a)
 int **read_pgm(const char *filename)
 {
     FILE *input = NULL;
-    char line[1024];
+    char line[2048];
     int levels;
     int xsize, ysize;
     int i1, j1;
