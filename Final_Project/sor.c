@@ -60,7 +60,7 @@ void sor(
  	P[i][jmax+1] = P[i][jmax];
    }
 
- if (strcmp(problem,"shear")==0 || strcmp(problem,"karman")==0){
+ if (strcmp(problem,"shear")==0 || strcmp(problem,"karman")==0|| strcmp(problem,"step")==0){
  	/* pressure differece driven flow */
  	for (j=1; j<=jmax; j++){
  		P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */

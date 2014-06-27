@@ -176,11 +176,11 @@ int main(int argc, char** args){
 		t += dt;
 		n++;
 
-		if(step*dt_value <= t){
+		/*if(step*dt_value <= t){*/
 			/* output vtk file for visualization */
-			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P );
+			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E );
 			step++;
-		}
+		/*}*/
 
 	}
 
