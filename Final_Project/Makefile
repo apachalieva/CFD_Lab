@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -O0 -Wall -pedantic -Werror -g -ggdb
+CC = icc
+CFLAGS = -Wall -pedantic -Werror -O3 -xHost
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\

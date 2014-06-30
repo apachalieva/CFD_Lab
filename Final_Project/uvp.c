@@ -288,52 +288,49 @@ void calculate_fg(
 	}
 	
 	/* Boundary conditions for the obstacle cells */
-	for( i = 1; i <= imax; i++ ){
-	    for( j = 1; j <= jmax; j++ ){
-		if( Flag[i][j] < C_F ){
-		      /* Boundary conditions for obstacles with Northern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_N ) == B_N ){
-			  G[ i ][ j ] = V[ i ][ j ]; 
-		      }
-		      /* Boundary conditions for obstacles with Southern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
-			  G[ i ][ j-1 ] = V[ i ][ j-1 ]; 
-		      }
-		      /* Boundary conditions for obstacles with Western fluid cell */
-		      if( ( Flag[ i ][ j ] & B_W ) == B_W ){
-			  F[ i-1 ][ j ] = U[ i-1 ][ j ];
-		      }
-		      /* Boundary conditions for obstacles with Eastern fluid cell */
-		      if( ( Flag[ i ][ j ] & B_E ) == B_E ){
-			  F[ i ][ j ] = U[ i ][ j ];
-		      }
-		      
+	for( i = 1; i <= imax; i++ )
+	    for( j = 1; j <= jmax; j++ )
+		if( IS_BOUNDARY(Flag[i][j])  ){
 		      /* Boundary conditions for obstacles with North-Eastern fluid cell */
 		      if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
 			  F[ i ][ j ] = U[ i ][ j ]; 
 			  G[ i ][ j ] = V[ i ][ j ];
-		      }
+		      } else
 		      
 		      /* Boundary conditions for obstacles with North-Western fluid cell */
 		      if( ( Flag[ i ][ j ] & B_NW ) == B_NW ){
 			  F[ i-1 ][ j ] = U[ i-1 ][ j ]; 
 			  G[ i ][ j ] = V[ i ][ j ];
-		      }
+		      } else
 		      
 		      /* Boundary conditions for obstacles with South-Eastern fluid cell */
 		      if( ( Flag[ i ][ j ] & B_SE ) == B_SE ){
 			  F[ i ][ j ] = U[ i ][ j ]; 
 			  G[ i ][ j-1 ] = V[ i ][ j-1 ];
-		      }
+		      } else
 		      
 		      /* Boundary conditions for obstacles with South-Western fluid cell */
 		      if( ( Flag[ i ][ j ] & B_SW ) == B_SW ){
 			  F[ i-1 ][ j ] = U[ i-1 ][ j ]; 
 			  G[ i ][ j-1 ] = V[ i ][ j-1 ];
+		      }else
+		      /* Boundary conditions for obstacles with Northern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+			  G[ i ][ j ] = V[ i ][ j ];
+		      } else
+		      /* Boundary conditions for obstacles with Southern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
+			  G[ i ][ j-1 ] = V[ i ][ j-1 ];
+		      } else
+		      /* Boundary conditions for obstacles with Western fluid cell */
+		      if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+			  F[ i-1 ][ j ] = U[ i-1 ][ j ];
+		      } else
+		      /* Boundary conditions for obstacles with Eastern fluid cell */
+		      if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+			  F[ i ][ j ] = U[ i ][ j ];
 		      }
 		}
-	    }
-	}
 
 	/* inner values */
 	for(i=1; i<=imax-1; i++)
@@ -384,8 +381,7 @@ void calculate_rs(
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			if( IS_FLUID(Flag[i][j]) )
-				RS[i][j] = 1/dt*((F[i][j]-F[i-1][j])/dx + (G[i][j]-G[i][j-1])/dy) ;
+				RS[i][j] = IS_FLUID(Flag[i][j]) * 1/dt*((F[i][j]-F[i-1][j])/dx + (G[i][j]-G[i][j-1])/dy) ;
 
 }
 
@@ -431,12 +427,12 @@ void calculate_uv(
 
 	for(i=1; i<=imax-1; i++)
 		for(j=1; j<=jmax; j++)
-			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F)
+			if(  IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i+1][j]) )
 				U[i][j] = F[i][j] - dt/dx*(P[i+1][j]-P[i][j]);
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
-			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F)
+			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i][j+1]) )
 				V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
 
 
@@ -469,8 +465,7 @@ void comp_KAEP(
 	
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			if(Flag[i][j]==C_F	)
-			{
+			if(IS_FLUID(Flag[i][j])	) {
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
 				/*printf("KA-- %d %d: %f %f %f %f %f %f %f %f %f %f \n", i,j,KA[i][j], dt,	dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
@@ -503,22 +498,25 @@ void comp_KAEP(
 		                gradU(U, V, dx, dy, i, j)
 		                , c2*f2( KA, EP, nu, delta, i, j )
 				);*/
+			}
 
+
+	for(i=1; i<=imax; i++)
+		for(j=1; j<=jmax; j++)
+			if(IS_FLUID(Flag[i][j])	) {
+				delta = get_delta(i, j, imax, jmax, dx, dy);
 				EP[i][j] = EP[i][j] + dt*(
-									  /*(ce/cn)**/ d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
-					                + /*(ce/cn)**/ d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
-					                - dUkedx( U, EP, dx, alpha, i, j )
-					                - dVkedy( V, EP, dy, alpha, i, j )
-					                + c1*f1(KA, EP, nu, delta, i, j)/2
-					                	*KA[i][j]
-					                	*gradU(U, V, dx, dy, i, j)
-					                - c2*f2( KA, EP, nu, delta, i, j )
-										*SQ(EP[i][j])
-										/KA[i][j]
-							);
-
-
-				EP[i][j] = EP[i][j]>100000?100000:EP[i][j];
+													  /*(ce/cn)**/ d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
+									                + /*(ce/cn)**/ d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
+									                - dUkedx( U, EP, dx, alpha, i, j )
+									                - dVkedy( V, EP, dy, alpha, i, j )
+									                + c1*f1(KA, EP, nu, delta, i, j)/2
+									                	*KA[i][j]
+									                	*gradU(U, V, dx, dy, i, j)
+									                - c2*f2( KA, EP, nu, delta, i, j )
+														*SQ(EP[i][j])
+														/KA[i][j]
+											);
 			}
 }
 

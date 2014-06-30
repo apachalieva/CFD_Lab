@@ -1,8 +1,8 @@
 #--------------------------------------------
 #            size of the domain             
 #--------------------------------------------
-xlength		100
-ylength		100
+xlength		40
+ylength		8
 
 #--------------------------------------------
 #            number of cells
@@ -13,9 +13,9 @@ jmax		20
 #--------------------------------------------
 #               time steps
 #--------------------------------------------
-dt		0.05
-t_end		20.0
-tau	 	0.5
+dt		0.001
+t_end		1.0
+tau	 	-0.5
 
 #--------------------------------------------
 #               output
@@ -81,6 +81,12 @@ dp		1.0
 #		else: scenario prescribed by choice of wl		
 #--------------------------------------------
 p		1
+
+#--------------------------------------------
+#       pgm=Name of pgm file that specifies the geometry
+#		it should not contain the file name extension .pgm
+#--------------------------------------------
+pgm		shear2
 
 #--------------------------------------------
 #       turbolent eddy viscosity

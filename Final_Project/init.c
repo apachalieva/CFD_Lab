@@ -32,7 +32,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
         		    double *cn,	/* turbolent eddy viscosity */
         		    double *ce,	/* turbolent modelling constants */
         		    double *c1,
-        		    double *c2
+        		    double *c2,
+			char* pgm
 )
 {
    int *wl,*wb,*wr,*wt;
@@ -80,6 +81,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
 
    READ_DOUBLE( szFileName, *dp );
    READ_INT   ( szFileName, *p );
+
+   read_string(szFileName, "pgm", pgm);
 
    *dx = *xlength / (double)(*imax);
    *dy = *ylength / (double)(*jmax);
@@ -147,26 +150,27 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	int **buffer;
 	int i, j;
 	
+	*fluid_cells=0;
 	if (strcmp(problem, "none") != 0){
 		snprintf( filename, sizeof filename, "%s%s", problem, ext );
 		buffer = read_pgm( filename );
 
-		for( i = 0; i <= imax+1; i++ ){
+		for( i = 0; i <= imax+1; i++ )
 			for( j = 0; j <= jmax+1; j++ ){
-			Flag[i][j] = buffer[i][j]*C_F;
+				Flag[i][j] = buffer[i][j]*C_F;
+				(*fluid_cells)+=buffer[i][j];
 			}
-		}
 
 		free_imatrix(buffer,0,imax+1,0,jmax+1);
 
 	} else {
 		for( i = 1; i <= imax; i++ ){
+			Flag[i][0] = C_B;
 			for( j = 1; j <= jmax; j++ ){
 				Flag[i][j] = C_F;
+				(*fluid_cells)++;
 			}
-		}
-		for( i = 1; i <= imax; i++ ){
-			Flag[i][0] = C_B;
+
 			Flag[i][jmax+1] = C_B;
 		}
 
@@ -179,19 +183,15 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	for( i = 1; i <= imax; i++ ){
 	    for( j = 1; j <= jmax; j++ ){
 		if( Flag[i][j] == C_B  ){
-		    ( *fluid_cells )--;		/* Counting the number of fluid cells in the geometry */
-		    if( Flag[i+1][j] == C_F ){
-			Flag[i][j] |= B_E;
-		    }
-		    if( Flag[i-1][j] == C_F ){
-			Flag[i][j] |= B_W;
-		    }
-		    if( Flag[i][j-1] == C_F ){
-			Flag[i][j] |= B_S;
-		    }
-		    if( Flag[i][j+1] == C_F ){
-			Flag[i][j] |= B_N;
-		    }
+		    if( Flag[i+1][j] == C_F )
+		    	Flag[i][j] |= B_E;
+		    if( Flag[i-1][j] == C_F )
+		    	Flag[i][j] |= B_W;
+		    if( Flag[i][j-1] == C_F )
+		    	Flag[i][j] |= B_S;
+		    if( Flag[i][j+1] == C_F )
+		    	Flag[i][j] |= B_N;
+
 
 		    /* Forbidden cells */
 		    if( ( Flag[i][j] & ( B_E | B_W ) ) == ( B_E | B_W ) || 

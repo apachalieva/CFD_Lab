@@ -68,7 +68,8 @@ int read_parameters( const char *szFileName,       /* name of the file */
         		    double *cn,	/* turbolent eddy viscosity */
         		    double *ce,	/* turbolent modelling constants */
         		    double *c1,/* turbolent modelling constants */
-        		    double *c2/* turbolent modelling constants */
+        		    double *c2,/* turbolent modelling constants */
+        		    char *pgm
 );			/* specification of the problem */
 
 /**
