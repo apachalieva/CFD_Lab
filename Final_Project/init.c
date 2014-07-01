@@ -144,7 +144,7 @@ void init_uvp(
  */
 void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag ){
 	
-	char filename[15];
+	char filename[35];
 	char ext[] = ".pgm\0";
 	
 	int **buffer;

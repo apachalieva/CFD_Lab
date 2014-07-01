@@ -76,7 +76,7 @@ dp		1
 #       pgm=Name of pgm file that specifies the geometry
 #		it should not contain the file name extension .pgm
 #--------------------------------------------
-pgm		shear2
+pgm		step
 
 #--------------------------------------------
 #       p=PROBLEM

@@ -96,8 +96,13 @@ int main(int argc, char** args){
 		default: strcpy(problem,"none");
 		}
 
+	printf("Problem: %s\n", problem );
+	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
+	printf( "imax = %d, jmax = %d\n", imax, jmax );
+	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
+	printf( "Number of fluid cells = %d\n", fluid_cells );
+	printf( "Reynolds number: %f\n", Re);
 
-	fluid_cells = imax*jmax;
 
 	/* Allocate Flag matrix */
 	Flag = imatrix( 0, imax+1, 0, jmax+1 );
@@ -186,11 +191,30 @@ int main(int argc, char** args){
 	}
 
 	printf("Problem: %s\n", problem );
+	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
 	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	printf( "Reynolds number: %f\n", Re);
 
+	/*int i,j;
+	for(j = 0; j < jmax+1; j++) {
+		    for(i = 0; i < imax+1; i++) {
+		      printf("%f ", (U[i][j] + U[i][j+1]) * 0.5);
+		      if(i!=imax) printf(", ");
+		    }
+		    printf("\n");
+		  }
+
+	 printf("\n\n");
+	 for(j = 0; j < jmax+1; j++) {
+		    for(i = 0; i < imax+1; i++) {
+		      printf("%f ", (V[i][j] + V[i+1][j]) * 0.5 );
+		      if(i!=imax) printf(", ");
+		    }
+		    printf("\n");
+		  }
+*/
 
 	/* free memory */
 	free_matrix(U,0,imax+1,0,jmax+1);

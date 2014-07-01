@@ -335,7 +335,7 @@ void calculate_fg(
 	/* inner values */
 	for(i=1; i<=imax-1; i++)
 		for(j=1; j<=jmax; j++)
-			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F){
+			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i+1][j]) ){
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
 				F[i][j] = U[i][j] + dt * (
@@ -350,7 +350,7 @@ void calculate_fg(
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
-			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F){
+			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i][j+1]) ){
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
 				G[i][j] = V[i][j] + dt * (
