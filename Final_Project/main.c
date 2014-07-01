@@ -185,8 +185,8 @@ int main(int argc, char** args){
 		/*if(step*dt_value <= t){*/
 			/* output vtk file for visualization */
 			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E );
-		/*	step++;
-		}*/
+			step++;
+		/*}*/
 
 	}
 
