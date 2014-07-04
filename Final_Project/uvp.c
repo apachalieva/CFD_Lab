@@ -23,77 +23,56 @@ inline double ddy(double **m, int i, int j, double dy){
 
 /* approximation of the first derivative of the square of u in x */
 inline double du2dx(double **m, int i, int j, double dx, double alpha){
-	return (
-			SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
-			+  alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) -  fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
-            )/dx/4.0;
+	return (SQ(m[i][j]+m[i+1][j]) - SQ(m[i-1][j]+m[i][j])
+	      + alpha * ( fabs(m[i][j]+m[i+1][j]) * (m[i][j]-m[i+1][j]) - fabs(m[i-1][j]+m[i][j]) * (m[i-1][j]-m[i][j]) )
+               )/dx/4.0;
 }
 
 /* approximation of the first derivative of the square of v in y */
 inline double dv2dy(double **m, int i, int j, double dy, double alpha){
-	return (
-			SQ(m[i][j]+m[i][j+1]) - SQ(m[i][j-1]+m[i][j])
-			+ alpha * ( fabs(m[i][j]+m[i][j+1]) * (m[i][j]-m[i][j+1]) -  fabs(m[i][j-1]+m[i][j]) * (m[i][j-1]-m[i][j]))
-	                       )/dy/4.0;
+	return (SQ(m[i][j]+m[i][j+1]) - SQ(m[i][j-1]+m[i][j])
+	      + alpha * ( fabs(m[i][j]+m[i][j+1]) * (m[i][j]-m[i][j+1]) -  fabs(m[i][j-1]+m[i][j]) * (m[i][j-1]-m[i][j]))
+	       )/dy/4.0;
 }
 
-
+/* approximation of the first derivative of the u and v in x */
 inline double duvdx(double ** u, double **v, int i, int j, double dx, double alpha){
-	return (
-			(u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]+v[i][j])
-			+ alpha * ( fabs(u[i][j]+u[i][j+1]) * (v[i][j]-v[i+1][j]) -  fabs(u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]-v[i][j]) )
-	                       )/dx/4.0;
+	return ( (u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]+v[i][j])
+	        + alpha * ( fabs(u[i][j]+u[i][j+1]) * (v[i][j]-v[i+1][j]) - fabs(u[i-1][j]+u[i-1][j+1]) * (v[i-1][j]-v[i][j]) )
+	        )/dx/4.0;
 }
 
+/* approximation of the first derivative of the u and v in y */
 inline double duvdy(double **u, double **v, int i, int j, double dy, double alpha){
-	return (
-			(u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i][j-1]+u[i][j]) * (v[i][j-1]+v[i+1][j-1])
-			+ alpha * ( fabs(v[i][j]+v[i+1][j]) * (u[i][j]-u[i][j+1]) -  fabs(v[i][j-1]+v[i+1][j-1]) * (u[i][j-1]-u[i][j]) )
-	                       )/dy/4.0;
+	return ( (u[i][j]+u[i][j+1]) * (v[i][j]+v[i+1][j]) - (u[i][j-1]+u[i][j]) * (v[i][j-1]+v[i+1][j-1])
+	        + alpha * ( fabs(v[i][j]+v[i+1][j]) * (u[i][j]-u[i][j+1]) - fabs(v[i][j-1]+v[i+1][j-1]) * (u[i][j-1]-u[i][j]) )
+	        )/dy/4.0;
 }
 
-
+/* Local Raynolds number for the k-eps model */
 inline double Rt(double **k, double **e, double nu, int i, int j){
-	/*printf("KA-------- %d %d: %f %f %f % f\n", i,j,SQ(k[i][j]), nu , e[i][j], SQ(k[i][j]) / nu / e[i][j]);*/
 	return SQ(k[i][j]) / nu / e[i][j];
 }
 
-inline double get_delta(int i, int j, int imax, int jmax, double dx, double dy){
-	return MIN(
-					MIN(  (i-0.5)*dx, (imax-(i-0.5))*dx  ),
-					MIN(  (j-0.5)*dy,  (jmax-(j-0.5))*dy )
-		);
-}
-
+/* Local Raynolds number for the k-eps model */
 double Rd(double **k, double nu, double delta, int i, int j){
-	/*printf("** %f, %f, %f, %f \n", k[i][j],nu,delta,sqrt(fabs(k[i][j])) * delta / nu);*/
 	return sqrt(fabs(k[i][j])) * delta / nu;
 }
 
-double fnu(double **k, double **e, double nu, double delta, int i, int j){
-	/*return SQ( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );*/
-	/*printf("	%f: %f\n", -0.0165 * Rd(k,nu,delta,i,j), exp( -0.0165 * Rd(k,nu,delta,i,j) ));*/
-
-	return 1.0;
-	/*printf("KA-----* %f %f %f % f\n", -0.0165 * Rd(k,nu,delta,i,j), exp( -0.0165 * Rd(k,nu,delta,i,j) ), Rt(k,e,nu,i,j), ( 1- exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  *( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) ));*/
-	/*return ( 1- exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  *( 1-exp( -0.0165 * Rd(k,nu,delta,i,j) ) )  * (1 + 20.5 / Rt(k,e,nu,i,j) );*/
+/* Calculation of the distance between the turbulent region and the nearest wall of the actual flow model */
+inline double get_delta(int i, int j, int imax, int jmax, double dx, double dy){
+	return MIN(
+		   MIN(  (i-0.5)*dx, (imax-(i-0.5))*dx  ),
+		   MIN(  (j-0.5)*dy,  (jmax-(j-0.5))*dy )
+		);
 }
 
-inline double f1(double **k, double **e, double nu, double delta, int i, int j){
-	return 1.0;
-	/*return 1 + (0.05 / fnu(k,e,nu,delta,i,j) ) * (0.05 / fnu(k,e,nu,delta,i,j) ) * (0.05 / fnu(k,e,nu,delta,i,j) );*/
-}
-
-inline double f2(double **k, double **e, double nu, double delta, int i, int j){
-	return 1.0;
-	/*return 1 - exp( - SQ( Rt(k,e,nu,i,j) ) );*/
-}
-
+/* Calculation of the total viscosity */
 double visc_t(double **k, double **e, double nu, double cn, double delta, int i, int j){
-	/*printf("KA---- %f %f %f %f \n", cn, fnu(k,e,nu,delta,i,j), SQ(k[i][j]) , e[i][j]);*/
-	return cn * fnu(k,e,nu,delta,i,j) * SQ(k[i][j]) / e[i][j];
+	return cn * SQ(k[i][j]) / e[i][j];
 }
 
+/* Calculation of the viscosity at time t(n+1) */
 inline double visc(double **k, double **e, double nu, double cn, double delta, int i, int j){
 	return nu + visc_t(k,e,nu,cn,delta,i,j);
 }
@@ -102,9 +81,14 @@ inline double visc2(double **k, double **e, double nu, double cn, double delta, 
 	return nu + visc_t(k,e,nu,cn,delta,i,j)/1.3;
 }
 
+/* Calculation of the viscosity on the corners */
 inline double visc_corner(double **k, double **e, double nu, double cn, double delta, int i, int j){
 	return ( visc(k,e,nu,cn,delta, i+1, j+1) + visc(k,e,nu,cn,delta, i, j+1) + visc(k,e,nu,cn,delta, i+1, j) + visc(k,e,nu,cn,delta, i, j) ) / 4.0;
 }
+
+/** 
+ *  Discretization of the Transport Equations for the calculation of k and epsilon
+ */
 
 inline double dndudxdx(double **k, double **e, double nu, double cn, double delta, double **u, int i, int j, double dx){
 	return (visc(k,e,nu,cn,delta, i+1, j) * (u[i+1][j] - u[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (u[i][j] - u[i-1][j])) / SQ(dx);
@@ -114,106 +98,77 @@ inline double dndvdydy(double **k, double **e, double nu, double cn, double delt
 	return (visc(k,e,nu,cn,delta, i, j+1) * (v[i][j+1] - v[i][j]) - visc(k,e,nu,cn,delta, i, j ) * (v[i][j] - v[i][j-1])) / SQ(dy);
 }
 
-
 inline double dndudypdvdxdy(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dx, double dy){
-	return (
-			  visc_corner(k,e,nu,cn,delta, i,j  )  * ( (u[i][j+1] - u[i][j  ])/dy + (v[i+1][j  ] - v[i][j  ])/dx )
-			- visc_corner(k,e,nu,cn,delta, i,j-1)  * ( (u[i][j  ] - u[i][j-1])/dy + (v[i+1][j-1] - v[i][j-1])/dx )
-			) /  dy;
+	return ( visc_corner(k,e,nu,cn,delta, i,j  )  * ( (u[i][j+1] - u[i][j  ])/dy + (v[i+1][j  ] - v[i][j  ])/dx )
+	       - visc_corner(k,e,nu,cn,delta, i,j-1)  * ( (u[i][j  ] - u[i][j-1])/dy + (v[i+1][j-1] - v[i][j-1])/dx )
+	        ) /  dy;
 }
 
 inline double dndudypdvdxdx(double **k, double **e, double nu, double cn, double delta, double **u, double **v, int i, int j, double dx, double dy){
-	return (
-			  visc_corner(k,e,nu,cn,delta, i   ,j)  * ( (u[i  ][j+1] - u[i  ][j  ])/dy + (v[i+1][j  ] - v[i  ][j  ])/dx )
-			- visc_corner(k,e,nu,cn,delta, i-1,j )  * ( (u[i-1][j+1] - u[i-1][j  ])/dy + (v[i  ][j  ] - v[i-1][j  ])/dx )
-			) /  dx;
+	return ( visc_corner(k,e,nu,cn,delta, i  ,j)  * ( (u[i  ][j+1] - u[i  ][j  ])/dy + (v[i+1][j  ] - v[i  ][j  ])/dx )
+	       - visc_corner(k,e,nu,cn,delta, i-1,j)  * ( (u[i-1][j+1] - u[i-1][j  ])/dy + (v[i  ][j  ] - v[i-1][j  ])/dx )
+		) / dx;
 }
-
 
 inline double dvisct_dx( double **k, double **e, double nu, double cn, double delta, double dx, int i, int j ){
 	double c1 = (visc( k, e, nu, cn, delta, i, j )+visc( k, e, nu, cn, delta, i+1, j ))/2;
 	double c2 = (visc( k, e, nu, cn, delta, i-1, j )+visc( k, e, nu, cn, delta, i, j ))/2;
 	double c3 = c1 * (k[i+1][j]-k[i][j]) - c2 *(k[i][j]-k[i-1][j]);
-	c3=c3/SQ(dx);
 
-	/*printf("KA---- %d %d: %f %f %f %f %f %f %f \n", i, j, c1, c2, c3, k[i+1][j], k[i][j], k[i][j], k[i-1][j] );*/
-
-	return c3;
+	return c3/SQ(dx);
 }
 
 inline double dvisct_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
 	double c1 = (visc( k, e, nu, cn, delta, i, j )+visc( k, e, nu, cn, delta, i, j+1 ))/2;
 	double c2 = (visc( k, e, nu, cn, delta, i, j-1 )+visc( k, e, nu, cn, delta, i, j ))/2;
 	double c3 = c1 * (k[i][j+1]-k[i][j]) - c2 * (k[i][j]-k[i][j-1]);
-	c3=c3/SQ(dy);
 
-	/*printf("KA---- %f %f %f \n", c1, c2, c3 );*/
-
-
-
-
-	return c3;
+	return c3/SQ(dy);
 }
 
 inline double dvisctEP_dx( double **k, double **e, double nu, double cn, double delta, double dx, int i, int j ){
-	return ( ((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i+1, j ))/2)*(e[i+1][j]-e[i][j]) - 
-	         ((visc_t( k, e, nu, cn, delta, i-1, j )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i-1][j]) )/SQ(dx);
+	return ( ((visc_t( k, e, nu, cn, delta, i, j ) + visc_t( k, e, nu, cn, delta, i+1, j ))/2) * (e[i+1][j]-e[i][j]) 
+	       - ((visc_t( k, e, nu, cn, delta, i-1, j ) + visc_t( k, e, nu, cn, delta, i, j ))/2) * (e[i][j]-e[i-1][j])
+	       )/SQ(dx);
 }
 
 inline double dvisctEP_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
-	return ( ((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) -  ((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) )/SQ(dy);
+	return ( ((visc_t( k, e, nu, cn, delta, i, j ) + visc_t( k, e, nu, cn, delta, i, j+1 ))/2) * (e[i][j+1]-e[i][j]) 
+	       - ((visc_t( k, e, nu, cn, delta, i, j-1 ) + visc_t( k, e, nu, cn, delta, i, j ))/2) * (e[i][j]-e[i][j-1]) 
+	       )/SQ(dy);
 }
 
 double d_fnu_visctEP_dx( double **k, double **e, double nu, double cn, double delta, double dx, int i, int j ){
-
-	double mean_f_1 = (fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i+1, j ))/2;
 	double mean_nu_1 = (visc2( k, e, nu, cn, delta, i, j )+visc2( k, e, nu, cn, delta, i+1, j ))/2;
-	/*double mean_nu_1 = visc_t( k, e, nu, cn, delta, i, j);*/
-
-	double c1 = mean_f_1 * mean_nu_1 * (e[i+1][j]-e[i][j]);
-
-	double mean_f_2 = (fnu( k, e, nu, delta, i-1, j )+fnu( k, e, nu, delta, i, j ))/2;
+	double c1 = mean_nu_1 * (e[i+1][j]-e[i][j]);
 	double mean_nu_2 = (visc2( k, e, nu, cn, delta, i-1, j )+visc2( k, e, nu, cn, delta, i, j ))/2;
-	/*double mean_nu_2 = visc_t( k, e, nu, cn, delta, i, j );*/
+	double c2 = mean_nu_2*(e[i][j]-e[i-1][j]);
 
-	double c2 = mean_f_2*mean_nu_2*(e[i][j]-e[i-1][j]);
-
-	double res = (c1-c2)/SQ(dx);
-
-
-	return res;
+	return (c1-c2)/SQ(dx);
 }
 
 double d_fnu_visctEP_dy( double **k, double **e, double nu, double cn, double delta, double dy, int i, int j ){
-	/*return (  ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i, j+1 ))/2)*((visc_t( k, e, nu, cn, delta, i, j )+visc_t( k, e, nu, cn, delta, i, j+1 ))/2)*(e[i][j+1]-e[i][j]) - ((fnu( k, e, nu, delta, i, j-1 )+fnu( k, e, nu, delta, i, j ))/2)*((visc_t( k, e, nu, cn, delta, i, j-1 )+visc_t( k, e, nu, cn, delta, i, j ))/2)*(e[i][j]-e[i][j-1]) )/SQ(dy); */
-
-	double c1 = ((fnu( k, e, nu, delta, i, j )+fnu( k, e, nu, delta, i, j+1 ))/2);
-	double c2 = ((visc2( k, e, nu, cn, delta, i, j )+visc2( k, e, nu, cn, delta, i, j+1 ))/2);
-
-	double c3 = ((fnu( k, e, nu, delta, i, j-1 )+fnu( k, e, nu, delta, i, j ))/2);
-	double c4 = ((visc2( k, e, nu, cn, delta, i, j-1 )+visc2( k, e, nu, cn, delta, i, j ))/2);
-
-	double res = (  c1*c2*(e[i][j+1]-e[i][j]) - c3 *c4 *(e[i][j]-e[i][j-1]) )/(dy*dy);
-
-	/*printf("d_fnu_visctEP_dy ---- %d %d: %f %f %f %f %f \n", i, j, c1, c2, c3, c4, res);*/
-
-	return res;
+	double c1 = ((visc2( k, e, nu, cn, delta, i, j )+visc2( k, e, nu, cn, delta, i, j+1 ))/2);
+	double c2 = ((visc2( k, e, nu, cn, delta, i, j-1 )+visc2( k, e, nu, cn, delta, i, j ))/2);
+	
+	return ( c1*(e[i][j+1]-e[i][j]) - c2*(e[i][j]-e[i][j-1]) )/(dy*dy);;
 }
-
-/* backward discretization */
+/* Approximation of the first derivative of the u in x, backward discretization */
 inline double dUdx( double **u, double dx, int i, int j ){
 	return ( u[i][j] - u[i-1][j] ) / dx;
 }
 
+/* Approximation of the first derivative of the u in y, backward discretization */
 inline double dUdy( double **u, double dy, int i, int j ){
-	/*printf("KA dudy ------ %d %d: %f %f %f %f %f\n", i, j, u[i][j], u[i][j+1], u[i-1][j+1], u[i][j-1], u[i-1][j-1]);*/
 	return ( (u[i][j+1]+u[i-1][j+1]) - (u[i][j-1]+u[i-1][j-1]) ) / (4*dy);
 }
 
+/* Approximation of the first derivative of the v in x, backward discretization */
 inline double dVdx( double **v, double dx, int i, int j ){
 	return ( (v[i+1][j]+v[i+1][j-1]) - (v[i-1][j]+v[i-1][j-1]) ) / (4*dx);
 }
 
+/* Approximation of the first derivative of the v in y, backward discretization */
 inline double dVdy( double **v, double dy, int i, int j ){
 	return (v[i][j]-v[i][j-1]) / dy;
 }
@@ -222,37 +177,43 @@ inline double gradU( double **u, double **v, double dx, double dy, int i, int j 
 	double c1 = 4*( dUdx( u, dx, i, j) )*( dUdx( u, dx, i, j) );
 	double c2 = 2*( dUdy( u, dy, i, j) + dVdx( v, dx, i, j ) )*( dUdy( u, dy, i, j) +dVdx( v, dx, i, j ) );
 	double c3 = 4*( dVdy( v, dy, i, j ) )*( dVdy( v, dy, i, j ) );
-
-	/*printf("KA grad ---- %d %d: %f %f %f %f %f %f %f \n", i, j, c1, c2, c3, dUdx( u, dx, i, j), dUdy( u, dy, i, j), dVdx( v, dx, i, j ) , dVdy( v, dy, i, j ) );*/
-
+	
 	return c1 + c2 + c3;
 }
-/* alpha [0, 1] determines a weighted average of discretizing with central differences and the donor-cell discretization */
-inline double dUkedx( double **u, double **ke, double dx, double alpha, int i, int j ){
 
-	double c1 = u[i][j]*(ke[i][j]+ke[i+1][j])/2;
-	double c2 = u[i-1][j]*(ke[i-1][j]+ke[i][j])/2;
+/** 
+ * Donor-cell sheme is used for discretization of the convective terms
+ *  alpha [0, 1] determines a weighted average of discretizing with central 
+ *  differences and the donor-cell discretization 
+ */
+inline double dUkedx( double **u, double **e, double dx, double alpha, int i, int j ){
+  
+	double c1 = u[i][j]*(e[i][j]+e[i+1][j])/2;
+	double c2 = u[i-1][j]*(e[i-1][j]+e[i][j])/2;
+	double c3 = fabs(u[i][j])*(e[i][j]-e[i+1][j])/2;
+	double c4 = fabs(u[i-1][j])*(e[i-1][j]-e[i][j])/2;
 
-	double c3 = fabs(u[i][j])*(ke[i][j]-ke[i+1][j])/2;
-	double c4 = fabs(u[i-1][j])*(ke[i-1][j]-ke[i][j])/2;
-
-	double res = (c1-c2)/dx +alpha/dx*(c3-c4);
-
-	return res;
+	return (c1-c2)/dx +alpha/dx*(c3-c4);
 }
 
-/* alpha [0, 1] determines a weighted average of discretizing with central differences and the donor-cell discretization */
-inline double dVkedy( double **v, double **ke, double dy, double alpha, int i, int j ){
-	double c1 = v[i][j]*(ke[i][j]+ke[i][j+1])/2;
-	double c2 = v[i][j-1]*(ke[i][j-1]+ke[i][j])/2;
-	double c3 = fabs(v[i][j])*(ke[i][j]-ke[i][j+1])/2;
-	double c4 = fabs(v[i][j-1])*(ke[i][j-1]-ke[i][j])/2;
-	double res = (c1-c2)/dy+alpha/dy*(c3-c4);
+/** 
+ * Donor-cell sheme is used for discretization of the convective terms
+ *  alpha [0, 1] determines a weighted average of discretizing with central 
+ *  differences and the donor-cell discretization 
+ */
+inline double dVkedy( double **v, double **e, double dy, double alpha, int i, int j ){
+  
+	double c1 = v[i][j]*(e[i][j]+e[i][j+1])/2;
+	double c2 = v[i][j-1]*(e[i][j-1]+e[i][j])/2;
+	double c3 = fabs(v[i][j])*(e[i][j]-e[i][j+1])/2;
+	double c4 = fabs(v[i][j-1])*(e[i][j-1]-e[i][j])/2;
 
-
-	return res;
+	return (c1-c2)/dy+alpha/dy*(c3-c4);
 }
 
+/**
+ * Calculation of F and G
+ */
 void calculate_fg(
   double Re,
   double GX,
@@ -261,8 +222,8 @@ void calculate_fg(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **U,
   double **V,
   double **F,
@@ -271,7 +232,7 @@ void calculate_fg(
   double **E,
   double nu,
   double cn,
-  int **Flag
+  int    **Flag
 ){
 	int i,j;
 	double delta;
@@ -339,13 +300,12 @@ void calculate_fg(
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
 				F[i][j] = U[i][j] + dt * (
-						2.0 * dndudxdx(K, E, nu, cn, delta, U, i, j, dx)
-						+ dndudypdvdxdy(K, E, nu, cn, delta, U, V, i, j, dx, dy)
-						/*- 2.0 * ddx(K,i,j,dx) / 3.0*/
-						- du2dx(U, i, j, dx, alpha)
-						- duvdy(U,V,i,j,dy, alpha)
-						+ GX
-						);
+					  2.0 * dndudxdx(K, E, nu, cn, delta, U, i, j, dx)
+					+ dndudypdvdxdy(K, E, nu, cn, delta, U, V, i, j, dx, dy)
+					- du2dx(U, i, j, dx, alpha)
+					- duvdy(U,V,i,j,dy, alpha)
+					+ GX
+					);
 			}
 
 	for(i=1; i<=imax; i++)
@@ -354,40 +314,41 @@ void calculate_fg(
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 
 				G[i][j] = V[i][j] + dt * (
-						dndudypdvdxdx(K, E, nu, cn, delta, U, V, i, j, dx, dy)
-						+ 2.0 * dndvdydy(K, E, nu, cn, delta, V, i, j, dy)
-						/*- 2.0 * ddy(K,i,j,dy) / 3.0*/
-						- duvdx(U,V,i,j,dx, alpha)
-						- dv2dy(V, i, j, dy, alpha)
-						+ GY
-						);
+					  dndudypdvdxdx(K, E, nu, cn, delta, U, V, i, j, dx, dy)
+					+ 2.0 * dndvdydy(K, E, nu, cn, delta, V, i, j, dy)
+					- duvdx(U,V,i,j,dx, alpha)
+					- dv2dy(V, i, j, dy, alpha)
+					+ GY 
+					 );
 			}
-
 }
 
-
+/**
+ * Calculation of the right-hand side of the pressure equation
+ */
 void calculate_rs(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **F,
   double **G,
   double **RS,
-  int **Flag
+  int    **Flag
 ){
 	int i,j;
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
 				RS[i][j] = IS_FLUID(Flag[i][j]) * 1/dt*((F[i][j]-F[i-1][j])/dx + (G[i][j]-G[i][j-1])/dy) ;
-
 }
 
-
-
-
+/**
+ * CFL conditions implemented, stepsize control
+ * 
+ * TODO NOT USED!
+ */
 void calculate_dt(
   double Re,
   double tau,
@@ -399,17 +360,15 @@ void calculate_dt(
   double **U,
   double **V
 ){
-
-
 	*dt = tau * fmin(
-					fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) ,
-							dx/fmatrix_max(U,0,imax+1,0,jmax+1) 	),
-								dy/fmatrix_max(V,0,imax+1,0,jmax+1)
-							);
-
+			fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)),dx/fmatrix_max(U,0,imax+1,0,jmax+1) ),
+			dy/fmatrix_max(V,0,imax+1,0,jmax+1)
+			);
 }
 
-
+/**
+ * Calculation of the u and v values
+ */
 void calculate_uv(
   double dt,
   double dx,
@@ -434,11 +393,12 @@ void calculate_uv(
 		for(j=1; j<=jmax-1; j++)
 			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i][j+1]) )
 				V[i][j] = G[i][j] - dt/dy*(P[i][j+1]-P[i][j]);
-
-
 }
 
-
+/**
+ * Computation of k(n+1) and eps(n+1) according to 
+ * the transport equations for k and eps
+ */
 void comp_KAEP( 
   double Re, 
   double nu,
@@ -463,60 +423,32 @@ void comp_KAEP(
 	int i, j;
 	double delta;
 	
+	/* Calculation of the k - turbulent kinetic energy */
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
 			if(IS_FLUID(Flag[i][j])	) {
 				delta = get_delta(i, j, imax, jmax, dx, dy);
-
-				/*printf("KA-- %d %d: %f %f %f %f %f %f %f %f %f %f \n", i,j,KA[i][j], dt,	dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
-									, dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
-								    ,dUkedx( U, KA, dx, alpha, i, j )
-								    , dVkedy( V, KA, dy, alpha, i, j )
-							        , visc_t( KA, EP, nu, cn, delta, i, j )
-							         ,gradU( U, V, dx, dy, i, j )
-							         , EP[i][j]
-							         , KA[i][j] + dt*( dvisct_dx( KA, EP, nu, cn, delta, dx, i, j ) + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )- dUkedx( U, KA, dx, alpha, i, j )- dVkedy( V, KA, dy, alpha, i, j ) + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )* gradU( U, V, dx, dy, i, j )- EP[i][j]));
-							         */
-
-
 				KA[i][j] = KA[i][j] + dt*(
-						dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
-						+ dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
-					    - dUkedx( U, KA, dx, alpha, i, j )
-					    - dVkedy( V, KA, dy, alpha, i, j )
-				        + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )
-				              * gradU( U, V, dx, dy, i, j )
-				        - EP[i][j]);
-
-				/*printf("EP-- %d %d --> %f %f %f %f %f %f %f %f %f %f \n",i,j,EP[i][j] , dt
-						  ,d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
-		                , d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
-		                , dUkedx( U, EP, dx, alpha, i, j )
-		                , dVkedy( V, EP, dy, alpha, i, j )
-		                , ((c1*f1(KA, EP, nu, delta, i, j))/2),
-		                KA[i][j],
-		                gradU(U, V, dx, dy, i, j)
-		                , c2*f2( KA, EP, nu, delta, i, j )
-				);*/
+					   dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
+					 + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
+					 - dUkedx( U, KA, dx, alpha, i, j )
+					 - dVkedy( V, KA, dy, alpha, i, j )
+				         + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j ) * gradU( U, V, dx, dy, i, j )
+				         - EP[i][j]
+					 );
 			}
-
-
+	/* Calculation of the eps - dissipation rate*/
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
 			if(IS_FLUID(Flag[i][j])	) {
 				delta = get_delta(i, j, imax, jmax, dx, dy);
 				EP[i][j] = EP[i][j] + dt*(
-													  /*(ce/cn)**/ d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
-									                + /*(ce/cn)**/ d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
-									                - dUkedx( U, EP, dx, alpha, i, j )
-									                - dVkedy( V, EP, dy, alpha, i, j )
-									                + c1*f1(KA, EP, nu, delta, i, j)/2
-									                	*KA[i][j]
-									                	*gradU(U, V, dx, dy, i, j)
-									                - c2*f2( KA, EP, nu, delta, i, j )
-														*SQ(EP[i][j])
-														/KA[i][j]
-											);
+					   d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
+					 + d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
+					 - dUkedx( U, EP, dx, alpha, i, j )
+					 - dVkedy( V, EP, dy, alpha, i, j )
+					 + c1 / 2 * KA[i][j] * gradU(U, V, dx, dy, i, j)
+					 - c2 * SQ(EP[i][j]) / KA[i][j]
+					 );
 			}
 }
-

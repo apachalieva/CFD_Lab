@@ -7,8 +7,8 @@ ylength		2
 #--------------------------------------------
 #            number of cells
 #--------------------------------------------
-imax		100
-jmax		20
+imax		1000
+jmax		200
 
 #--------------------------------------------
 #               time steps
@@ -86,7 +86,7 @@ p		0
 #       pgm=Name of pgm file that specifies the geometry
 #		it should not contain the file name extension .pgm
 #--------------------------------------------
-pgm		shear2
+pgm		karman
 
 #--------------------------------------------
 #       turbolent eddy viscosity
