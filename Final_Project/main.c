@@ -113,8 +113,7 @@ int main(int argc, char** args){
 	step=0;
 
 	while( t <= t_end ){
-		/*TODO if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);*/
-
+	  
 		boundaryvalues( imax, jmax, U, V, K, E, boundaries, Flag );
 
 		/* special inflow boundaries, including k and eps */
@@ -155,7 +154,7 @@ int main(int argc, char** args){
 		/*}*/
 	}
 
-	printf("Problem: %s\n", problem );
+	printf( "Problem: %s\n", problem );
 	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
 	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
