@@ -124,7 +124,7 @@ void init_uvp(
 
 	if(strcmp(problem, "step") == 0)
 		for(i=1;i<=imax; i++)
-			for(j=1;j<=jmax/2; j++)
+			for(j=1;j<=jmax/3; j++)
 					U[i][j] = 0;
 }
 
@@ -153,6 +153,7 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 	*fluid_cells=0;
 	if (strcmp(problem, "none") != 0){
 		snprintf( filename, sizeof filename, "%s%s", problem, ext );
+		printf("reading geometry file '%s'\n", filename);
 		buffer = read_pgm( filename );
 
 		for( i = 0; i <= imax+1; i++ )
@@ -191,7 +192,6 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 		    	Flag[i][j] |= B_S;
 		    if( Flag[i][j+1] == C_F )
 		    	Flag[i][j] |= B_N;
-
 
 		    /* Forbidden cells */
 		    if( ( Flag[i][j] & ( B_E | B_W ) ) == ( B_E | B_W ) || 
