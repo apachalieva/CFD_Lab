@@ -22,18 +22,19 @@
  * @author Tobias Neckel
  */
 void write_vtkFile(const char *szProblem,
-		  int    timeStepNumber,
-		  double xlength,
-                  double ylength,
-                  int    imax,
-                  int    jmax,
-		  double dx,
-		  double dy,
-                  double **U,
-                  double **V,
-                  double **P,
-                  double **K,
-                  double **E);
+		 int    timeStepNumber,
+		 double xlength,
+                 double ylength,
+                 int    imax,
+                 int    jmax,
+		 double dx,
+		 double dy,
+                 double **U,
+                 double **V,
+                 double **P,
+                 double **K,
+                 double **E,
+                 int** Flag);
 
 /**
  * Method for writing header information in vtk format. 

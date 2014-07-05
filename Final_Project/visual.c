@@ -15,7 +15,8 @@ void write_vtkFile(const char *szProblem,
                  double **V,
                  double **P,
                  double **K,
-                 double **E) {
+                 double **E,
+                 int** Flag) {
   
   int i,j;
   char szFileName[80];
@@ -66,6 +67,14 @@ void write_vtkFile(const char *szProblem,
   for(j = 1; j < jmax+1; j++) {
     for(i = 1; i < imax+1; i++) {
       fprintf(fp, "%f\n", E[i][j] );
+    }
+  }
+
+  fprintf(fp, "SCALARS flag_field int 1 \n");
+  fprintf(fp, "LOOKUP_TABLE default \n");
+  for(j = 1; j < jmax+1; j++) {
+    for(i = 1; i < imax+1; i++) {
+      fprintf(fp, "%d\n", Flag[i][j] );
     }
   }
 
