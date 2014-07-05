@@ -86,7 +86,7 @@ p		0
 #       pgm=Name of pgm file that specifies the geometry
 #		it should not contain the file name extension .pgm
 #--------------------------------------------
-pgm		shear2
+pgm		karman
 
 #--------------------------------------------
 #       turbolent eddy viscosity
