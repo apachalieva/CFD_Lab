@@ -45,7 +45,7 @@ void sor(
 		          ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
 
 
-  /* Residual devided only by the number of fluid cells instead of imax*jmax */
+  /* Residual divided only by the number of fluid cells instead of imax*jmax */
   rloc = rloc/((double)fluid_cells);
   rloc = sqrt(rloc);
   /* set residual */
@@ -60,7 +60,8 @@ void sor(
  	P[i][jmax+1] = P[i][jmax];
    }
 
- if (strcmp(problem,"shear")==0 || strcmp(problem,"karman")==0|| strcmp(problem,"step")==0){
+/* if (strcmp(problem,"shear")==0 || strcmp(problem,"karman")==0|| strcmp(problem,"step")==0){*/ 
+   if (dp!=0){
  	/* pressure differece driven flow */
  	for (j=1; j<=jmax; j++){
  		P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */
