@@ -314,8 +314,8 @@ void spec_boundary_val(
 			V[0][j]= V[1][j];
 		}
 
-		k[0][j] = k[1][j];
-		eps[0][j] = eps[1][j];
+		K[0][j] = K[1][j];
+		E[0][j] = E[1][j];
 
 		/*kin = 0.003*SQ(U[0][j]);
 		k[0][j]=2.*kin-k[1][j];
