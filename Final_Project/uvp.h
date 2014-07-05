@@ -138,6 +138,20 @@ void comp_KAEP(
   int **Flag 
 );
 
+void comp_surface_force(
+  double Re,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U,
+  double **V,
+  double **P,
+  int **Flag,
+  double *Fu,
+  double *Fv
+);
+
 
 
 #endif
