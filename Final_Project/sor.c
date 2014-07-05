@@ -2,6 +2,9 @@
 #include "helper.h"
 #include <math.h>
 
+/**
+ * SOR Method
+ */
 void sor(
   double omg,
   double dx,
@@ -13,27 +16,21 @@ void sor(
   double **RS,
   int    **Flag,
   double *res,
-  char* problem,
+  char   *problem,
   double dp
-) {
+){
   int i,j;
   double rloc;
   double coeff = omg/(2.0*(1.0/(dx*dx)+1.0/(dy*dy)));
 
-
-  
-  
   /* SOR iteration */
   for(i = 1; i <= imax; i++) {
       for(j = 1; j<=jmax; j++) {
 		  /* SOR computation limited to the fluid cells ( C_F - fluid cell )*/
-
 			if ( IS_FLUID(Flag[ i ][ j ]) )
 				P[i][j] =  (1.0-omg)*P[i][j] + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
-
       }
   }
-
 
   /* compute the residual */
   rloc = 0;
@@ -44,17 +41,13 @@ void sor(
 	      	  	  ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
 		          ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
 
-
-  /* Residual divided only by the number of fluid cells instead of imax*jmax */
+  /* Residual devided only by the number of fluid cells instead of imax*jmax */
   rloc = rloc/((double)fluid_cells);
   rloc = sqrt(rloc);
   /* set residual */
   *res = rloc;
 
-
-
-
-  /* set homogenous neumann boundary conditions for pressure in the horizontal walls */
+  /* set homogenous Neumann boundary conditions for pressure in the horizontal walls */
    for(i = 1; i <= imax; i++) {
  	P[i][0] = P[i][1];
  	P[i][jmax+1] = P[i][jmax];
@@ -64,8 +57,8 @@ void sor(
    if (dp!=0){
  	/* pressure differece driven flow */
  	for (j=1; j<=jmax; j++){
- 		P[0][j]=2.0*dp-P[1][j]; 					/* set left pressure dirichlet condition to p_w = dp */
- 		P[imax+1][j]=-P[imax][j]; 					/* set right pressure dirichlet condition to p_w = 0 */
+ 		P[0][j]=2.0*dp-P[1][j]; 	/* set left pressure dirichlet condition to p_w = dp */
+ 		P[imax+1][j]=-P[imax][j]; 	/* set right pressure dirichlet condition to p_w = 0 */
  	}
  } else {
  	  /* set homogenous neumann boundary conditions for pressure in the vertical walls */
@@ -115,7 +108,6 @@ void sor(
  		if( ( Flag[ i ][ j ] & B_E ) == B_E ){
  		    P[ i ][ j ] = P[ i+1 ][ j ];
  		}
-
  	    }
  	}
      }

@@ -2,38 +2,38 @@
 #include "init.h"
 
 
-int read_parameters( const char *szFileName,       /* name of the file */
-                    double *Re,                /* reynolds number   */
-                    double *UI,                /* velocity x-direction */
-                    double *VI,                /* velocity y-direction */
-                    double *PI,                /* pressure */
-                    double *GX,                /* gravitation x-direction */
-                    double *GY,                /* gravitation y-direction */
-                    double *t_end,             /* end time */
-                    double *xlength,           /* length of the domain x-dir.*/
-                    double *ylength,           /* length of the domain y-dir.*/
-                    double *dt,                /* time step */
-                    double *dx,                /* length of a cell x-dir. */
-                    double *dy,                /* length of a cell y-dir. */
-                    int  *imax,                /* number of cells x-direction*/
-                    int  *jmax,                /* number of cells y-direction*/
-                    double *alpha,             /* uppwind differencing factor*/
-                    double *omg,               /* relaxation factor */
-                    double *tau,               /* safety factor for time step*/
-                    int  *itermax,             /* max. number of iterations  */
-		                               /* for pressure per time step */
-                    double *eps,               /* accuracy bound for pressure*/
-                    double *dt_value,           /* time for output */
-                    int *boundrs, 		/* vector for boundaries */
-                    double *dp,			/* dp/dx gradient of pressure */
-                    int *p,			/* specification of the problem */
-        		    double *K,	/* kinetic energy intial value */
-        		    double *E,	/* dissipation rate initial value */
-        		    double *cn,	/* turbolent eddy viscosity */
-        		    double *ce,	/* turbolent modelling constants */
-        		    double *c1,
-        		    double *c2,
-			char* pgm
+int read_parameters( const char *szFileName,   /* name of the file 		*/
+                    double *Re,                /* reynolds number   		*/
+                    double *UI,                /* velocity x-direction 		*/
+                    double *VI,                /* velocity y-direction 		*/
+                    double *PI,                /* pressure			*/
+                    double *GX,                /* gravitation x-direction 	*/
+                    double *GY,                /* gravitation y-direction 	*/
+                    double *t_end,             /* end time 			*/
+                    double *xlength,           /* length of the domain x-dir	*/
+                    double *ylength,           /* length of the domain y-dir	*/
+                    double *dt,                /* time step 			*/
+                    double *dx,                /* length of a cell x-dir 	*/
+                    double *dy,                /* length of a cell y-dir	*/
+                    int    *imax,              /* number of cells x-direction	*/
+                    int    *jmax,              /* number of cells y-direction	*/
+                    double *alpha,             /* uppwind differencing factor	*/
+                    double *omg,               /* relaxation factor 		*/
+                    double *tau,               /* safety factor for time step	*/
+                    int    *itermax,           /* max. number of iterations  	*/
+		                               /* for pressure per time step 	*/
+                    double *eps,               /* accuracy bound for pressure	*/
+                    double *dt_value,          /* time for output 		*/
+                    int    *boundrs, 	       /* vector for boundaries 	*/
+                    double *dp,		       /* dp/dx gradient of pressure 	*/
+                    int    *p,		       /* specification of the problem 	*/
+		    double *K,		       /* kinetic energy intial value 	*/
+        	    double *E,		       /* dissipation rate initial value*/
+        	    double *cn,		       /* turbolent eddy viscosity 	*/
+        	    double *ce,		       /* turbolent modelling constants */
+        	    double *c1,		       /* turbolent modelling constants */
+        	    double *c2,		       /* turbolent modelling constants */
+		    char   *pgm		       /* specification of the problem  */
 )
 {
    int *wl,*wb,*wr,*wt;
@@ -90,36 +90,36 @@ int read_parameters( const char *szFileName,       /* name of the file */
    return 1;
 }
 
+/**
+ * The arrays U, V, P, K and E are initialized 
+ * to the constant values UI, VI, PI, KI and EI 
+ * on the whole domain.
+ */
 void init_uvp(
   double UI,
   double VI,
   double PI,
   double KI,
   double EI,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **U,
   double **V,
   double **P,
   double **K,
   double **E,
-  int **Flagfield,
-  char* problem
+  int    **Flagfield,
+  char*  problem
 ){
-
-	/* init_matrix( U , 0, imax+1, 0, jmax+1, UI );
-	 init_matrix( V , 0, imax+1, 0, jmax+1, VI );
-	 init_matrix( P , 0, imax+1, 0, jmax+1, PI );*/
-
 	int i,j;
 
-	for(i=0;i<=imax+1; i++)
-		for(j=0;j<=jmax+1; j++){
-				U[i][j] =  IS_FLUID(Flagfield[i][j]) * UI;
-				V[i][j] =  IS_FLUID(Flagfield[i][j]) * VI;
-				P[i][j] =  IS_FLUID(Flagfield[i][j]) * PI;
-				K[i][j] =  IS_FLUID(Flagfield[i][j]) * KI;
-				E[i][j] =  IS_FLUID(Flagfield[i][j]) * EI;
+	for( i=0;i<=imax+1; i++ )
+		for( j=0;j<=jmax+1; j++ ){
+				U[i][j] = IS_FLUID(Flagfield[i][j]) * UI;
+				V[i][j] = IS_FLUID(Flagfield[i][j]) * VI;
+				P[i][j] = IS_FLUID(Flagfield[i][j]) * PI;
+				K[i][j] = IS_FLUID(Flagfield[i][j]) * KI;
+				E[i][j] = IS_FLUID(Flagfield[i][j]) * EI;
 		}
 
 	if(strcmp(problem, "step") == 0)
@@ -128,8 +128,8 @@ void init_uvp(
 					U[i][j] = 0;
 }
 
-
-/* Initialize the flagfield regarding the problem choosen. 
+/** 
+ * Initialize the flagfield regarding the problem chosen. 
  * C_F	:	Fluid cell
  * C_B	:	Obstacle cell
  * 
@@ -142,8 +142,13 @@ void init_uvp(
  * B_NE	:	Boundary cell with North-Eastern fluid cell
  * B_NW	:	Boundary cell with North-Western fluid cell
  */
-void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag ){
-	
+void init_flag( 
+  const char *problem, 
+  const int  imax, 
+  const int  jmax, 
+  int        *fluid_cells, 
+  int        **Flag 
+){
 	char filename[35];
 	char ext[] = ".pgm\0";
 	
@@ -171,7 +176,6 @@ void init_flag( const char *problem, const int imax, const int jmax, int *fluid_
 				Flag[i][j] = C_F;
 				(*fluid_cells)++;
 			}
-
 			Flag[i][jmax+1] = C_B;
 		}
 
