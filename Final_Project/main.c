@@ -65,10 +65,10 @@ int main(int argc, char** args){
 	char pgm[50];
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res, dp, nu;
 	double **U, **V, **P, **F, **G, **RS;
-	double **K;					/* turbulent kinetic energy k */
-	double **E; 					/* dissipation rate epsilon */
+	double **K, **E;					/* turbulent kinetic energy k, dissipation rate epsilon*/
+	double Fu, Fv;						/* force integration variables */
 	double KI, EI, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
-	int n, step, it, imax, jmax, itermax, pb;
+	int n, it, imax, jmax, itermax, pb;
 	int fluid_cells;		/* Number of fluid cells in our geometry */
 	char problem[10];		/* Problem name, file name */
 	int boundaries[4];
@@ -96,13 +96,6 @@ int main(int argc, char** args){
 		default: strcpy(problem,"none");
 		}
 
-	printf("Problem: %s\n", problem );
-	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
-	printf( "imax = %d, jmax = %d\n", imax, jmax );
-	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
-	printf( "Number of fluid cells = %d\n", fluid_cells );
-	printf( "Reynolds number: %f\n", Re);
-
 
 	/* Allocate Flag matrix */
 	Flag = imatrix( 0, imax+1, 0, jmax+1 );
@@ -122,9 +115,15 @@ int main(int argc, char** args){
 	init_flag( pgm, imax, jmax, &fluid_cells, Flag );
 	init_uvp(UI, VI, PI, KI, EI, imax, jmax, U, V, P, K, E, Flag, problem);
 
+	printf("Problem: %s\n", problem );
+	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
+	printf( "imax = %d, jmax = %d\n", imax, jmax );
+	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
+	printf( "Number of fluid cells = %d\n", fluid_cells );
+	printf( "Reynolds number: %f\n", Re);
+
 	t=.0;
 	n=0;
-	step=0;
 
 	while( t <= t_end ){
 		/*if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);*/
@@ -169,10 +168,7 @@ int main(int argc, char** args){
 			it++;
 		}
 
-		printf("[%d: %f] dt: %f, sor iterations: %d \n", n, t, dt, it);
-
-		if( it == itermax )
-		    printf( "    WARNING: Maximum number of iterations reached.\n" );
+		printf("[%4d: %f] dt: %f, sor iterations: %4d \n", n, t, dt, it);
 
 		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
 
@@ -181,14 +177,11 @@ int main(int argc, char** args){
 
 		t += dt;
 		n++;
-
-		/*if(step*dt_value <= t){*/
-			/* output vtk file for visualization */
-			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E );
-			step++;
-		/*}*/
-
 	}
+
+	write_vtkFile( VISUAF, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E, Flag);
+
+	comp_surface_force( Re, dx, dy, imax, jmax, U, V, P, Flag, &Fu, &Fv);
 
 	printf("Problem: %s\n", problem );
 	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
@@ -197,24 +190,26 @@ int main(int argc, char** args){
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	printf( "Reynolds number: %f\n", Re);
 
+	printf( "Drag force = %f Lift force = %f\n", Fu, Fv);
+
 	/*int i,j;
 	for(j = 0; j < jmax+1; j++) {
 		    for(i = 0; i < imax+1; i++) {
-		      printf("%f ", (U[i][j] + U[i][j+1]) * 0.5);
-		      if(i!=imax) printf(", ");
+		      fprintf(stderr, "%f ", (U[i][j] + U[i][j+1]) * 0.5);
+		      if(i!=imax) fprintf(stderr, ", ");
 		    }
-		    printf("\n");
+		    fprintf(stderr, "\n");
 		  }
 
 	 printf("\n\n");
 	 for(j = 0; j < jmax+1; j++) {
 		    for(i = 0; i < imax+1; i++) {
-		      printf("%f ", (V[i][j] + V[i+1][j]) * 0.5 );
-		      if(i!=imax) printf(", ");
+		      fprintf(stderr, "%f ", (V[i][j] + V[i+1][j]) * 0.5 );
+		      if(i!=imax) fprintf(stderr, ", ");
 		    }
-		    printf("\n");
-		  }
-*/
+		    fprintf(stderr, "\n");
+		  }*/
+
 
 	/* free memory */
 	free_matrix(U,0,imax+1,0,jmax+1);
