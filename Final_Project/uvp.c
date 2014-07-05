@@ -12,13 +12,47 @@ inline double d2dy(double **m, int i, int j, double dy){
 }
 
 /* forward difference approximation of the first derivative in x */
-inline double ddx(double **m, int i, int j, double dx){
+inline double ddx_fw(double **m, double dx, int i, int j){
 	return (m[i+1][j] - m[i][j]) / dx;
 }
 
 /* forward difference approximation of the first derivative in y */
-inline double ddy(double **m, int i, int j, double dy){
+inline double ddy_fw(double **m, double dy, int i, int j){
 	return (m[i][j+1] - m[i][j]) / dy;
+}
+
+/* backward discretization */
+inline double ddx_bw( double **u, double dx, int i, int j ){
+	return ( u[i][j] - u[i-1][j] ) / dx;
+}
+inline double ddy_bw( double **v, double dy, int i, int j ){
+	return (v[i][j]-v[i][j-1]) / dy;
+}
+
+inline double dUdy_center( double **u, double dy, int i, int j ){
+	return ( (u[i][j+1]+u[i-1][j+1]) - (u[i][j-1]+u[i-1][j-1]) ) / (4*dy);
+}
+inline double dVdx_center( double **v, double dx, int i, int j ){
+	return ( (v[i+1][j]+v[i+1][j-1]) - (v[i-1][j]+v[i-1][j-1]) ) / (4*dx);
+}
+
+inline double dUdx_hedge( double **u, double dx, int i, int j ){
+	return ( (u[i][j+1]+u[i][j]) - (u[i-1][j+1]+u[i-1][j]) ) / (2*dx);
+}
+inline double dUdy_hedge( double **u, double dy, int i, int j ){
+	return ( (u[i][j+1]+u[i-1][j+1]) - (u[i][j]+u[i-1][j]) ) / (2*dy);
+}
+inline double dUdy_vedge( double **u, double dy, int i, int j ){
+	return ( u[i][j+1] - u[i][j-1] ) / (2*dy);
+}
+inline double dVdx_hedge( double **v, double dx, int i, int j ){
+	return  (v[i+1][j]-v[i-1][j] ) / (2*dx);
+}
+inline double dVdx_vedge( double **v, double dx, int i, int j ){
+	return ( (v[i][j]+v[i][j-1]) - (v[i-1][j]+v[i-1][j-1])  ) / (2*dx);
+}
+inline double dVdy_vedge( double **v, double dy, int i, int j ){
+	return ( (v[i-1][j]+v[i][j]) - (v[i-1][j-1]+v[i][j-1]) ) / (2*dy);
 }
 
 /* approximation of the first derivative of the square of u in x */
@@ -200,30 +234,18 @@ double d_fnu_visctEP_dy( double **k, double **e, double nu, double cn, double de
 	return res;
 }
 
-/* backward discretization */
-inline double dUdx( double **u, double dx, int i, int j ){
-	return ( u[i][j] - u[i-1][j] ) / dx;
-}
 
-inline double dUdy( double **u, double dy, int i, int j ){
-	/*printf("KA dudy ------ %d %d: %f %f %f %f %f\n", i, j, u[i][j], u[i][j+1], u[i-1][j+1], u[i][j-1], u[i-1][j-1]);*/
-	return ( (u[i][j+1]+u[i-1][j+1]) - (u[i][j-1]+u[i-1][j-1]) ) / (4*dy);
-}
 
-inline double dVdx( double **v, double dx, int i, int j ){
-	return ( (v[i+1][j]+v[i+1][j-1]) - (v[i-1][j]+v[i-1][j-1]) ) / (4*dx);
-}
 
-inline double dVdy( double **v, double dy, int i, int j ){
-	return (v[i][j]-v[i][j-1]) / dy;
-}
+
+
 
 inline double gradU( double **u, double **v, double dx, double dy, int i, int j ){
-	double c1 = 4*( dUdx( u, dx, i, j) )*( dUdx( u, dx, i, j) );
-	double c2 = 2*( dUdy( u, dy, i, j) + dVdx( v, dx, i, j ) )*( dUdy( u, dy, i, j) +dVdx( v, dx, i, j ) );
-	double c3 = 4*( dVdy( v, dy, i, j ) )*( dVdy( v, dy, i, j ) );
+	double c1 = 4*( ddx_bw( u, dx, i, j) )*( ddx_bw( u, dx, i, j) );
+	double c2 = 2*( dUdy_center( u, dy, i, j) + dVdx_center( v, dx, i, j ) )*( dUdy_center( u, dy, i, j) +dVdx_center( v, dx, i, j ) );
+	double c3 = 4*( ddy_bw( v, dy, i, j ) )*( ddy_bw( v, dy, i, j ) );
 
-	/*printf("KA grad ---- %d %d: %f %f %f %f %f %f %f \n", i, j, c1, c2, c3, dUdx( u, dx, i, j), dUdy( u, dy, i, j), dVdx( v, dx, i, j ) , dVdy( v, dy, i, j ) );*/
+	/*printf("KA grad ---- %d %d: %f %f %f %f %f %f %f \n", i, j, c1, c2, c3, ddx_bw( u, dx, i, j), dUdy_center( u, dy, i, j), dVdx_center( v, dx, i, j ) , ddy_bw( v, dy, i, j ) );*/
 
 	return c1 + c2 + c3;
 }
@@ -341,7 +363,7 @@ void calculate_fg(
 				F[i][j] = U[i][j] + dt * (
 						2.0 * dndudxdx(K, E, nu, cn, delta, U, i, j, dx)
 						+ dndudypdvdxdy(K, E, nu, cn, delta, U, V, i, j, dx, dy)
-						/*- 2.0 * ddx(K,i,j,dx) / 3.0*/
+						/*- 2.0 * ddx_fw(K,i,j,dx) / 3.0*/
 						- du2dx(U, i, j, dx, alpha)
 						- duvdy(U,V,i,j,dy, alpha)
 						+ GX
@@ -356,7 +378,7 @@ void calculate_fg(
 				G[i][j] = V[i][j] + dt * (
 						dndudypdvdxdx(K, E, nu, cn, delta, U, V, i, j, dx, dy)
 						+ 2.0 * dndvdydy(K, E, nu, cn, delta, V, i, j, dy)
-						/*- 2.0 * ddy(K,i,j,dy) / 3.0*/
+						/*- 2.0 * dVdy_fw(K,i,j,dy) / 3.0*/
 						- duvdx(U,V,i,j,dx, alpha)
 						- dv2dy(V, i, j, dy, alpha)
 						+ GY
@@ -520,3 +542,63 @@ void comp_KAEP(
 			}
 }
 
+
+
+
+
+void comp_surface_force(
+  double Re,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U,
+  double **V,
+  double **P,
+  int **Flag,
+  double *Fu,
+  double *Fv
+){
+
+	int i,j;
+	double pmin;
+
+	*Fu=.0;
+	*Fv=.0;
+
+	pmin = P[1][1];
+	for(i=1; i<=imax; i++)
+		for(j=1; j<=jmax; j++)
+			if ( P[i][j] < pmin )
+				pmin = P[i][j];
+
+	printf("pmin = %f\n", pmin);
+
+	for(i=1; i<=imax; i++)
+		for(j=1; j<=jmax; j++)
+			if(IS_BOUNDARY(Flag[i][j])	) {
+
+				  /* Boundary conditions for obstacles with Northern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+					  *Fu += dx*(dUdy_hedge(U, dy, i, j) + dVdx_hedge(V,dx,i,j)) / Re;
+					  *Fv += dx*( (2.0*ddy_bw(V,dy,i,j+1)) /Re - (P[i][j+1]-pmin) );
+				  }
+				  /* Boundary conditions for obstacles with Southern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
+					  *Fu += -dx*(dUdy_hedge(U, dy, i, j-1) + dVdx_hedge(V,dx,i,j-1)) / Re;
+					  *Fv += -dx*( (2.0*ddy_bw(V,dy,i,j-1)) /Re  - (P[i][j-1]-pmin) );
+				  }
+				  /* Boundary conditions for obstacles with Western fluid cell */
+				  if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+					  *Fu += -dy*( (2.0 * ddx_bw(U, dx, i-1, j)) / Re - (P[i-1][j]-pmin) );
+					  *Fv += -dy*(dVdx_vedge(V, dx, i, j) + dUdy_vedge(U, dy, i-1, j)) /Re;
+				  }
+				  /* Boundary conditions for obstacles with Eastern fluid cell */
+				  if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+					  *Fu += dy*( (2.0 * ddx_bw(U, dx, i+1, j)) / Re - (P[i+1][j]-pmin) );
+					  *Fv += dy*(dVdx_vedge(V, dx, i+1, j) + dUdy_vedge(U, dy, i, j)) /Re;
+				  }
+
+			}
+
+}
