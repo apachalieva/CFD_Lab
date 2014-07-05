@@ -64,7 +64,7 @@ double fmin( double a, double b);
 double fmax( double a, double b);
 
 double fmatrix_max(double ** m, int nrl, int nrh, int ncl, int nch);
-
+double fmatrix_min(double ** m, int nrl, int nrh, int ncl, int nch);
 
 /**
  * Error handling:
