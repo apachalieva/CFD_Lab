@@ -186,7 +186,7 @@ void boundaryvalues(
 	/* Boundary conditions for the obstacle cells */
 	for( i = 1; i <= imax; i++ )
 	    for( j = 1; j <= jmax; j++ )
-			if( Flag[i][j] < C_F ){
+			if( IS_BOUNDARY(Flag[i][j]) ){
 				  /* Boundary conditions for obstacles with North-Eastern fluid cell */
 				  if( ( Flag[ i ][ j ] & B_NE ) == B_NE ){
 					  U[ i ][ j ] = .0;
@@ -286,60 +286,30 @@ void spec_boundary_val( char* problem, int imax, int jmax, double **U, double **
  * we deal with these problems
  */
 	int j;
-	/*double kin;*/
-	if (strcmp(problem,"karman")==0)
-		/* printf("setting the left boundary to velocity : u=1, v=0;\n"); */
-		for (j=1; j<=jmax; j++){
-			/*U[0][j]=1.0;
-			V[0][j]=-V[1][j]; */		/* setting the average equal to 0 */
-			U[0][j]= U[1][j];
+
+
+
+	for (j=1; j<=jmax; j++){
+
+		if(dp==0){
+			/* inflow velocity */
+			U[0][j]=1.0;
+			V[0][j]=-V[1][j];		/* setting the average equal to 0 */
+		}else{
+			/* pressure driven flow */			
+			U[0][j]= U[1][j];		/* homogeneous neumann conditions */
 			V[0][j]= V[1][j];
-
-			k[0][j] = k[1][j];
-			eps[0][j] = eps[1][j];
-
-			/*kin = 0.003*SQ(U[0][j]);
-			k[0][j]=2.*kin-k[1][j];
-			eps[0][j]=2.*cn*sqrt(fabs(kin)*SQ(kin))/0.03/ylength-eps[1][j];*/
-
 		}
-	else if(strcmp(problem,"shear")==0)
-			for (j=1; j<=jmax; j++){
-				U[0][j]= U[1][j];
-				V[0][j]= V[1][j]; 		/* setting the average equal to 0 */
 
-				k[0][j] = k[1][j];
-				eps[0][j] = eps[1][j];
+		k[0][j] = k[1][j];
+		eps[0][j] = eps[1][j];
 
-				/*kin = 0.003*SQ(U[0][j]);
-				k[0][j]=2.*kin-k[1][j];
-				eps[0][j]=2.*cn*sqrt(fabs(kin)*SQ(kin))/0.03/ylength-eps[1][j];*/
-				/*k[0][j]=.5;*/
-			}
-	else if(strcmp(problem,"step")==0){
-				 /* printf("setting the left boundary: lower half = step, upper half: u=1, v=0;\n"); */
-				if (jmax%2!=0)
-					printf("odd number of cells on the vertical boundary: asymmetric problem!");
+		/*kin = 0.003*SQ(U[0][j]);
+		k[0][j]=2.*kin-k[1][j];
+		eps[0][j]=2.*cn*sqrt(fabs(kin)*SQ(kin))/0.03/ylength-eps[1][j];*/
 
-				for (j = 1; j<=jmax/2; j++){
-						 	U[0][j]= 0.0;
-							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							k[0][j] = k[1][j];
-							eps[0][j] = eps[1][j];
-							/*kin = 0.003*SQ(U[0][j]);
-							k[0][j]=2.*kin-k[1][j];
-							eps[0][j]=2.*cn*sqrt(fabs(kin)*SQ(kin))/0.03/ylength-eps[1][j];*/
-					}
+	}
 
-				for (j = (jmax/2+1); j<=jmax; j++){
-						 	U[0][j]= 1.0;
-							V[0][j]= -V[1][j]; 		/* setting the average equal to 0 */
-							k[0][j] = k[1][j];
-							eps[0][j] = eps[1][j];
-							/*kin = 0.003*SQ(U[0][j]);
-							k[0][j]=2.*kin-k[1][j];
-							eps[0][j]=2.*cn*sqrt(kin*SQ(kin))/0.03/ylength-eps[1][j];*/
-						}
-			}
+	return;
 }
 
