@@ -80,12 +80,10 @@ pgm		circle
 #--------------------------------------------
 #       p=PROBLEM
 #		specify type of problem
-# 		p = 0 for Karman vortex
-#		p = 1 for Plane shear flow
-#		p = 2 for flow over a step
-#		else: scenario prescribed by choice of wl		
+#		p = 0 for an not specific problem
+#		p = 1 for flow over a step
 #--------------------------------------------
-p		1
+p		0
 
 #--------------------------------------------
 #       turbolent eddy viscosity
