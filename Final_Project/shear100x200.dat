@@ -1,8 +1,8 @@
 #--------------------------------------------
 #            size of the domain             
 #--------------------------------------------
-xlength		2
-ylength		0.01
+xlength		10
+ylength		2
 
 #--------------------------------------------
 #            number of cells
@@ -75,12 +75,10 @@ dp		1.0
 #--------------------------------------------
 #       p=PROBLEM
 #		specify type of problem
-# 		p = 0 for Karman vortex
-#		p = 1 for Plane shear flow
-#		p = 2 for flow over a step
-#		else: scenario prescribed by choice of wl		
+#		p = 0 for an not specific problem
+#		p = 1 for flow over a step
 #--------------------------------------------
-p		1
+p		0
 
 #--------------------------------------------
 #       pgm=Name of pgm file that specifies the geometry
