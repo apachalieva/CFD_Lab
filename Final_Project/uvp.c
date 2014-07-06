@@ -479,31 +479,28 @@ void comp_surface_force(
 	pmin = P[1][1];
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			if ( P[i][j] < pmin )
-				pmin = P[i][j];
-
-	printf("pmin = %f\n", pmin);
+			pmin = MIN(pmin, P[i][j]);
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
 			if(IS_BOUNDARY(Flag[i][j])	) {
 
-				  /* Boundary conditions for obstacles with Northern fluid cell */
+				  
 				  if( ( Flag[ i ][ j ] & B_N ) == B_N ){
 					  *Fu += dx*(dUdy_hedge(U, dy, i, j) + dVdx_hedge(V,dx,i,j)) / Re;
-					  *Fv += dx*( (2.0*ddy_bw(V,dy,i,j+1)) /Re - (P[i][j+1]-pmin) );
+					  *Fv += dx*( (2.0* ddy_bw(V,dy,i,j+1)) /Re - (P[i][j+1]-pmin) );
 				  }
-				  /* Boundary conditions for obstacles with Southern fluid cell */
+				
 				  if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
 					  *Fu += -dx*(dUdy_hedge(U, dy, i, j-1) + dVdx_hedge(V,dx,i,j-1)) / Re;
-					  *Fv += -dx*( (2.0*ddy_bw(V,dy,i,j-1)) /Re  - (P[i][j-1]-pmin) );
-				  }
-				  /* Boundary conditions for obstacles with Western fluid cell */
+					  *Fv += -dx*( (2.0* ddy_bw(V,dy,i,j-1)) /Re  - (P[i][j-1]-pmin) );
+				  } 	
+				 
 				  if( ( Flag[ i ][ j ] & B_W ) == B_W ){
 					  *Fu += -dy*( (2.0 * ddx_bw(U, dx, i-1, j)) / Re - (P[i-1][j]-pmin) );
 					  *Fv += -dy*(dVdx_vedge(V, dx, i, j) + dUdy_vedge(U, dy, i-1, j)) /Re;
 				  }
-				  /* Boundary conditions for obstacles with Eastern fluid cell */
+				  
 				  if( ( Flag[ i ][ j ] & B_E ) == B_E ){
 					  *Fu += dy*( (2.0 * ddx_bw(U, dx, i+1, j)) / Re - (P[i+1][j]-pmin) );
 					  *Fv += dy*(dVdx_vedge(V, dx, i+1, j) + dUdy_vedge(U, dy, i, j)) /Re;

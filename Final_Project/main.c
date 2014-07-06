@@ -9,7 +9,7 @@
 #include <math.h>
 
 #define PARAMF "cavity.dat"
-#define VISUAF "visual/sim"
+#define VISUAF "visual/sim_"
 
 /**
  * The main operation reads the configuration file, initializes the scenario and
@@ -59,8 +59,9 @@ int main(int argc, char** args){
 	int boundaries[4];
 	int **Flag;			/* Flagflield matrix */
 	
+	char vtkname[100];
 	char pgm[50];
-	char problem[10];		/* Problem name, file name */
+	char problem[10];		/* Problem name */
 	char *fname;
 
 	if(argc>=2) 	fname=args[1];
@@ -105,7 +106,7 @@ int main(int argc, char** args){
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
 	printf( "dt = %f, dx = %f, dy = %f\n", dt, dx, dy);
 	printf( "Number of fluid cells = %d\n", fluid_cells );
-	printf( "Reynolds number: %f\n", Re);
+	printf( "Reynolds number: %f\n\n", Re);
 
 	t=.0;
 	n=0;
@@ -142,13 +143,14 @@ int main(int argc, char** args){
 		n++;
 	}
 
-	write_vtkFile( VISUAF, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E, Flag);
+	sprintf(vtkname, "%s%s", VISUAF, fname);
+	write_vtkFile( vtkname, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E, Flag);
 	comp_surface_force( Re, dx, dy, imax, jmax, U, V, P, Flag, &Fu, &Fv);
 
 	printf( "Problem: %s\n", problem );
 	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
-	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
+	printf( "dt = %f, dx = %f, dy = %f\n", dt, dx, dy);
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	printf( "Reynolds number: %f\n", Re);
 	printf( "Drag force = %f Lift force = %f\n", Fu, Fv);
