@@ -17,13 +17,11 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
                     double *dy,                /* length of a cell y-dir	*/
                     int    *imax,              /* number of cells x-direction	*/
                     int    *jmax,              /* number of cells y-direction	*/
-                    double *alpha,             /* uppwind differencing factor	*/
+                    double *alpha,             /* upwind differencing factor	*/
                     double *omg,               /* relaxation factor 		*/
-                    double *tau,               /* safety factor for time step	*/
                     int    *itermax,           /* max. number of iterations  	*/
 		                               /* for pressure per time step 	*/
                     double *eps,               /* accuracy bound for pressure	*/
-                    double *dt_value,          /* time for output 		*/
                     int    *boundrs, 	       /* vector for boundaries 	*/
                     double *dp,		       /* dp/dx gradient of pressure 	*/
                     int    *p,		       /* specification of the problem 	*/
@@ -33,7 +31,11 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
         	    double *ce,		       /* turbolent modelling constants */
         	    double *c1,		       /* turbolent modelling constants */
         	    double *c2,		       /* turbolent modelling constants */
-		    char   *pgm		       /* specification of the problem  */
+		    char   *pgm,		       /* specification of the problem  */
+		double *nu,			/* viscosity */
+		double *KI,			/* initial value for kinetic energy */
+		double *EI,			/* intial value for dissipation rate */
+		char *problem
 )
 {
    int *wl,*wb,*wr,*wt;
@@ -49,11 +51,9 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
 
    READ_DOUBLE( szFileName, *omg   );
    READ_DOUBLE( szFileName, *eps   );
-   READ_DOUBLE( szFileName, *tau   );
    READ_DOUBLE( szFileName, *alpha );
 
    READ_INT   ( szFileName, *itermax );
-   READ_DOUBLE( szFileName, *dt_value );
 
    READ_DOUBLE( szFileName, *UI );
    READ_DOUBLE( szFileName, *VI );
@@ -86,6 +86,20 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
 
    *dx = *xlength / (double)(*imax);
    *dy = *ylength / (double)(*jmax);
+
+	/* compute viscosity */
+	*nu=1.0 / *Re;
+	/* compute initial values for kinetic energy and dissipation rate from initial velocity */
+	*KI = 0.003 * SQ(*UI);
+	*EI = sqrt(*KI*SQ(*KI)) * *cn / 0.03 / *ylength;
+
+	/* setting of the problem */
+	switch (*p){
+		case 1:	strcpy(problem,"step");
+		break;
+		default: strcpy(problem,"none");
+		break;
+	}
 
    return 1;
 }
@@ -125,7 +139,7 @@ void init_uvp(
 	if(strcmp(problem, "step") == 0)
 		for(i=1;i<=imax; i++)
 			for(j=1;j<=jmax/3; j++)
-					U[i][j] = 0;
+					U[i][j] = .0;
 }
 
 /** 

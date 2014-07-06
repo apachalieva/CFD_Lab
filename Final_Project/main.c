@@ -8,7 +8,7 @@
 #include <string.h>
 #include <math.h>
 
-#define PARAMF "cavity.dat"
+#define PARAMF "shear.dat"
 #define VISUAF "visual/sim_"
 
 /**
@@ -67,22 +67,7 @@ int main(int argc, char** args){
 	if(argc>=2) 	fname=args[1];
 	else 			fname = PARAMF;
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2, pgm);
-
-	nu=1.0 / Re;
-	KI = 0.003 * SQ(UI);
-	EI = sqrt(KI*SQ(KI)) * cn / 0.03 / ylength;
-
-	/* setting of the problem */
-	switch (pb){
-		case 0:	strcpy(problem,"karman");
-		break;
-		case 1:	strcpy(problem,"shear");
-		break;
-		case 2:	strcpy(problem,"step");
-		break;
-		default: strcpy(problem,"none");
-		}
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &itermax, &eps, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2, pgm, &nu, &KI, &EI, problem);
 
 	Flag = imatrix( 0, imax+1, 0, jmax+1 );
 
@@ -134,7 +119,7 @@ int main(int argc, char** args){
 			it++;
 		}
 
-		printf("[%4d: %f] dt: %f, sor iterations: %4d \n", n, t, dt, it);
+		printf("[%5d: %f] dt: %f, sor iterations: %4d \n", n, t, dt, it);
 
 		/* calculate new values for u and v */
 		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
@@ -147,32 +132,13 @@ int main(int argc, char** args){
 	write_vtkFile( vtkname, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E, Flag);
 	comp_surface_force( Re, dx, dy, imax, jmax, U, V, P, Flag, &Fu, &Fv);
 
-	printf( "Problem: %s\n", problem );
+	printf( "\nProblem: %s\n", problem );
 	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
 	printf( "dt = %f, dx = %f, dy = %f\n", dt, dx, dy);
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	printf( "Reynolds number: %f\n", Re);
 	printf( "Drag force = %f Lift force = %f\n", Fu, Fv);
-
-	/*int i,j;
-	for(j = 0; j < jmax+1; j++) {
-		    for(i = 0; i < imax+1; i++) {
-		      fprintf(stderr, "%f ", (U[i][j] + U[i][j+1]) * 0.5);
-		      if(i!=imax) fprintf(stderr, ", ");
-		    }
-		    fprintf(stderr, "\n");
-		  }
-
-	 printf("\n\n");
-	 for(j = 0; j < jmax+1; j++) {
-		    for(i = 0; i < imax+1; i++) {
-		      fprintf(stderr, "%f ", (V[i][j] + V[i+1][j]) * 0.5 );
-		      if(i!=imax) fprintf(stderr, ", ");
-		    }
-		    fprintf(stderr, "\n");
-		  }*/
-
 
 	/* free memory */
 	free_matrix(U,0,imax+1,0,jmax+1);

@@ -55,11 +55,9 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
                     int    *jmax,              /* number of cells y-direction	*/
                     double *alpha,             /* uppwind differencing factor	*/
                     double *omg,               /* relaxation factor 		*/
-                    double *tau,               /* safety factor for time step	*/
                     int    *itermax,           /* max. number of iterations  	*/
 		                               /* for pressure per time step 	*/
                     double *eps,               /* accuracy bound for pressure	*/
-                    double *dt_value,          /* time for output 		*/
                     int    *boundrs, 	       /* vector for boundaries 	*/
                     double *dp,		       /* dp/dx gradient of pressure 	*/
                     int    *p,		       /* specification of the problem 	*/
@@ -69,7 +67,11 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
         	    double *ce,		       /* turbolent modelling constants */
         	    double *c1,		       /* turbolent modelling constants */
         	    double *c2,		       /* turbolent modelling constants */
-		    char   *pgm		       /* specification of the problem  */
+		    char   *pgm,	       /* specification of the problem  */
+		double *nu,			/* viscosity */
+		double *KI,			/* initial value for kinetic energy */
+		double *EI,			/* intial value for dissipation rate */
+		char *problem
 );			
 
 /**
