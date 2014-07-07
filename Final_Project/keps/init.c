@@ -158,7 +158,7 @@ void init_flag(
   int        *fluid_cells, 
   int        **Flag 
 ){
-	char filename[35];
+	char filename[200];
 	char ext[] = ".pgm\0";
 	
 	int **buffer;

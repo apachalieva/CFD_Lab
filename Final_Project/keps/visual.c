@@ -19,7 +19,7 @@ void write_vtkFile(const char *szProblem,
                  int** Flag) {
   
   int i,j;
-  char szFileName[80];
+  char szFileName[200];
   FILE *fp=NULL;
   sprintf( szFileName, "%s.%i.vtk", szProblem, timeStepNumber );
   fp = fopen( szFileName, "w");
