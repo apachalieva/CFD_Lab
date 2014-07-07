@@ -69,15 +69,12 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
         	    double *c2,		       /* turbolent modelling constants */
 		    char   *pgm,	       /* specification of the problem  */
 		double *nu,			/* viscosity */
-		double *KI,			/* initial value for kinetic energy */
-		double *EI,			/* intial value for dissipation rate */
-		char *problem
-);			
+		char *problem /* specification of the problem 	*/
+);
 
 /**
- * The arrays U, V, P, K and E are initialized 
- * to the constant values UI, VI, PI, KI and EI 
- * on the whole domain.
+ * The arrays U,V and P are initialized to the constant values UI, VI and PI on
+ * the whole domain.
  */
 void init_uvp(
   double UI,
@@ -100,6 +97,7 @@ void init_uvp(
  * Initialize the flagfield regarding the problem chosen. 
  */
 void init_flag( 
+ const char *folder, 
  const char *problem, 
  const int  imax, 
  const int  jmax, 

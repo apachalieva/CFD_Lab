@@ -8,8 +8,8 @@
 #include <string.h>
 #include <math.h>
 
-#define PARAMF "cavity.dat"
-#define VISUAF "visual/sim"
+#define VISUA_FOLDER "./visual/"
+#define CONFIGS_FOLDER "./../configs/"
 
 /**
  * The main operation reads the configuration file, initializes the scenario and
@@ -46,71 +46,40 @@
  */
 
 
-
-
-void has_nan(double **m, int imax, int jmax){
-	int i,j;
-
-	for(i=0; i<=imax+1; i++)
-			for(j=0; j<=jmax+1; j++){
-				if (m[i][j] != m[i][j])
-					printf("[%d, %d] NaN\n", i,j);
-				if (isinf(m[i][j]))
-					printf("[%d, %d] Inf\n", i,j);
-			}
-}
-
-
 int main(int argc, char** args){
-	char pgm[50];
+	
 	double Re, UI, VI, PI, GX, GY, t_end, xlength, ylength, dt, dx, dy, alpha, omg, tau, eps, dt_value, t, res, dp, nu;
 	double **U, **V, **P, **F, **G, **RS;
 	double **K;					/* turbulent kinetic energy k */
-	double **W; 					/* omega: dissipation frequency eps/K */
+	double **W; 				/* omega: dissipation frequency eps/K */
 	double **delta;				/* matrix of the distances */
+	double Fu, Fv;				/* force integration variables */
 	double KI, EI, WI, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
-	int n, step, it, imax, jmax, itermax, pb;
+
+	int n, it, imax, jmax, itermax, pb, boundaries[4];
 	int fluid_cells;		/* Number of fluid cells in our geometry */
-	char problem[10];		/* Problem name, file name */
-	int boundaries[4];
-	char *fname;
-	/*int i,j;*/
-
 	int **Flag;			/* Flagflield matrix */
+	
+	char vtkname[200];
+	char pgm[200];
+	char problem[10];		/* Problem name */
+	char fname[200];
 
-	if(argc>=2) 	fname=args[1];
-	else 			fname = PARAMF;
+	if(argc<2){
+		printf("No parameter file specified. Terminating...\n");
+		exit(1);
+	}
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, boundaries, &dp, &pb, &KI, &WI, &cn, &ce, &c1, &c2, pgm);
+	sprintf(fname, "%s%s", CONFIGS_FOLDER, args[1]);
+	printf("%s\n",fname);
 
-	nu = 1.0 / Re;
-	KI = 0.003 * SQ(UI);
-	EI = sqrt(KI*SQ(KI)) * cn / 0.03 / ylength;
-	WI = EI/KI;
-
-	printf("WI: %f\n",WI);
-	printf("KI: %f\n",KI);
-
-	/* setting of the problem */
-	switch (pb){
-		case 0:	strcpy(problem,"karman");
-		break;
-		case 1:	strcpy(problem,"shear");
-		break;
-		case 2:	strcpy(problem,"step");
-		break;
-		default: strcpy(problem,"none");
-		}
-
-
-	fluid_cells = imax*jmax;
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &itermax, &eps, boundaries, &dp, &pb, &KI, &WI, &cn, &ce, &c1, &c2, pgm, &nu, problem);
 
 	/* Allocate Flag matrix */
 	Flag = imatrix( 0, imax+1, 0, jmax+1 );
 	/* Allocate delta matrix */
 	delta = matrix( 0, imax+1, 0, jmax+1 );
 
-	/* should we change the dimension of the matrices in order to save space? */
 	U = matrix ( 0 , imax+1 , 0 , jmax+1 );
 	V = matrix ( 0 , imax+1 , 0 , jmax+1 );
 	P = matrix ( 0 , imax+1 , 0 , jmax+1 );
@@ -122,111 +91,64 @@ int main(int argc, char** args){
 	K=matrix ( 0 , imax+1 , 0 , jmax+1 );
 	W=matrix ( 0 , imax+1 , 0 , jmax+1 );
 	
-	init_flag( pgm, imax, jmax, &fluid_cells, Flag );
+	/* Initialize values to the Flag, u, v and p */
+	init_flag(CONFIGS_FOLDER,pgm, imax, jmax, &fluid_cells, Flag );
 	init_delta(Flag,delta,imax,jmax,dx,dy);
 	init_uvp(UI, VI, PI, KI, WI, imax, jmax, U, V, P, K, W, Flag, problem);
 
-	/* printing the matrix */
-
-	/*
-	for (i=0;i<=imax+1; i++){
-		printf("delta[ %d ] --> ",i);
-		for(j=0;j<=jmax+1; j++){
-			printf("%f ",delta[i][j]);
-			fflush(stdout);
-		}
-
-		printf("\n");
-	}
-	printf("\n");
-	*/
+	printf("Problem: %s\n", problem );
+	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
+	printf( "imax = %d, jmax = %d\n", imax, jmax );
+	printf( "dt = %f, dx = %f, dy = %f\n", dt, dx, dy);
+	printf( "Number of fluid cells = %d\n", fluid_cells );
+	printf( "Reynolds number: %f\n\n", Re);
 
 	t=.0;
 	n=0;
-	step=0;
-
 
 	while( t <= t_end ){
-		/*if( tau > 0 ) calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);*/
-
 		boundaryvalues( imax, jmax, dx, dy, U, V, K, W, nu, boundaries, Flag );
 
-		/*has_nan(U,imax,jmax);
-		has_nan(V,imax,jmax);
-		has_nan(W,imax,jmax);
-		has_nan(K,imax,jmax);*/
-
-
-
 		/* special inflow boundaries, including k and eps */
-		spec_boundary_val( problem, imax, jmax, U, V, K, W, Re, dp, cn, ylength); /* modify BC for W */
+		spec_boundary_val( problem, imax, jmax, U, V, K, W, Re, dp, cn, ylength);
 
-		/*has_nan(U,imax,jmax);
-		has_nan(V,imax,jmax);
-		has_nan(K,imax,jmax);
-		has_nan(W,imax,jmax);
-		*/
-
+		/* calculate new values for k and w */
 		comp_KAW(Re, nu, ce, c1, c2, alpha, dt, dx, dy, imax, jmax, U, V, K, W, GX, GY, delta, Flag);
-
-
-		/*
-		has_nan(U,imax,jmax);
-		has_nan(V,imax,jmax);
-		has_nan(K,imax,jmax);
-		has_nan(W,imax,jmax);
-		*/
-
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, W, nu, delta,Flag );
 
-
-
-		/*has_nan(F,imax-1,jmax-1);
-		has_nan(G,imax-1,jmax-1);*/
-
 		/* calculate right hand side */
 		calculate_rs( dt, dx, dy, imax, jmax, F, G, RS, Flag );
-		/*
-		 * has_nan(RS,imax-1,jmax-1);
-		 */
 
 		it = 0;
 		res = 10000.0;
 		while( it < itermax && fabs(res) > eps ){
 			sor( omg, dx, dy, imax, jmax, fluid_cells, P, RS, Flag, &res, problem, dp );
-			has_nan(P,imax,jmax);
 			it++;
 		}
 
-		printf("[%d: %f] dt: %f, sor iterations: %d \n", n, t, dt, it);
+		printf("[%5d: %f] dt: %f, sor iterations: %4d \n", n, t, dt, it);
 
-		if( it == itermax )
-		    printf( "    WARNING: Maximum number of iterations reached.\n" );
-
+		/* calculate new values for u and v */
 		calculate_uv( dt, dx, dy, imax, jmax, U, V, F, G, P, Flag );
-
-		/*has_nan(U,imax,jmax);
-		has_nan(V,imax,jmax);*/
 
 		t += dt;
 		n++;
-
-		if(step*dt_value <= t){
-			/* output vtk file for visualization */
-			write_vtkFile( VISUAF, n, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, W );
-			step++;
-		}
-
 	}
 
-	printf("Problem: %s\n", problem );
+	sprintf(vtkname, "%s%s", VISUA_FOLDER,  args[1]);
+	write_vtkFile( vtkname, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, W, Flag);
+	
+	comp_surface_force( Re, dx, dy, imax, jmax, U, V, P, Flag, &Fu, &Fv);
+
+	printf( "\nProblem: %s\n", problem );
+	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
 	printf( "imax = %d, jmax = %d\n", imax, jmax );
-	printf( "dt = %f, dx = %f, dy = %f %f\n", dt, dx, dy, dt/dx/dy);
+	printf( "dt = %f, dx = %f, dy = %f\n", dt, dx, dy);
 	printf( "Number of fluid cells = %d\n", fluid_cells );
 	printf( "Reynolds number: %f\n", Re);
-
+	printf( "Drag force = %f Lift force = %f\n", Fu, Fv);
 
 	/* free memory */
 	free_matrix(U,0,imax+1,0,jmax+1);
@@ -241,7 +163,7 @@ int main(int argc, char** args){
 	free_matrix(G,0,imax,0,jmax);
 	free_matrix(RS,0,imax,0,jmax);
 
-	free_imatrix( Flag, 0, imax+1, 0, jmax+1 );
+	free_imatrix(Flag,0,imax+1,0,jmax+1);
 
 	return 0;
 }

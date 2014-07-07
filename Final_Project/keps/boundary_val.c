@@ -28,7 +28,7 @@ void no_slip(
 			U[0][j] = .0;		/* set zero to u-values exactly at the boundary */
 			V[0][j] = -V[1][j];	/* set the v-values not at the boundary so that the mean in the boundary is zero */
 			K[0][j] = 0.000001;	/* set 0.000001 to k-values at the boundary */
-			E[0][j] = E[1][j];	/* set the eps-values not at the boundary so that the mean in the boundary is zero */
+			E[0][j] = E[1][j];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -37,7 +37,7 @@ void no_slip(
 			U[imax][j]   =.0;		/* set zero to u-values exactly at the boundary */
 			V[imax+1][j] = -V[imax][j];	/* set the v-values not at the boundary so that the mean in the boundary is zero */
 			K[imax+1][j] = 0.000001;	/* set 0.000001 to k-values at the boundary */
-			E[imax+1][j] = E[imax][j];	/* set the eps-values not at the boundary so that the mean in the boundary is zero */
+			E[imax+1][j] = E[imax][j];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -46,7 +46,7 @@ void no_slip(
 			U[i][0] = -U[i][1];	/* set the u-values not at the boundary so that the mean in the boundary is zero */
 			V[i][0] = .0;		/* set zero to v-values exactly at the boundary */
 			K[i][0] = 0.000001;	/* set 0.000001 to k-values at the boundary */
-			E[i][0] = E[i][1];	/* set the eps-values not at the boundary so that the mean in the boundary is zero */
+			E[i][0] = E[i][1];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -55,11 +55,12 @@ void no_slip(
 			U[i][jmax+1] = -U[i][jmax];	/* set the u-values not at the boundary so that the mean in the boundary is zero */
 			V[i][jmax]   = .0;		/* set zero to v-values exactly at the boundary */
 			K[i][jmax+1] = 0.000001;	/* set 0.000001 to k-values at the boundary */
-			E[i][jmax+1] = E[i][jmax];	/* set the eps-values not at the boundary so that the derivative normal to the boundary is zero */
+			E[i][jmax+1] = E[i][jmax];	/* homogeneous Neumann */
 			}
 		}
 	break;
 	}
+
 }
 
 /**
@@ -81,8 +82,8 @@ void free_slip(
 		for (j=1; j<=jmax; j++){
 			U[0][j] = .0;		/* set zero to u-values exactly at the boundary */
 			V[0][j] = V[1][j];	/* set the v-values not at the boundary so that the derivative normal to the boundary is zero */
-			K[0][j] = K[1][j];	/* set the k-values not at the boundary so that the derivative normal to the boundary is zero */
-			E[0][j] = E[1][j];	/* set the eps-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[0][j] = K[1][j];	/* homogeneous Neumann */
+			E[0][j] = E[1][j];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -90,8 +91,8 @@ void free_slip(
 		for (j=1; j<=jmax; j++){
 			U[imax][j]   = 0;		/* set zero to u-values exactly at the boundary */
 			V[imax+1][j] = V[imax][j];	/* set the v-values not at the boundary so that the derivative normal to the boundary is zero */
-			K[imax+1][j] = K[imax][j];	/* set the k-values not at the boundary so that the derivative normal to the boundary is zero */
-			E[imax+1][j] = E[imax][j];	/* set the eps-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[imax+1][j] = K[imax][j];	/* homogeneous Neumann */
+			E[imax+1][j] = E[imax][j];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -99,8 +100,8 @@ void free_slip(
 		for (i=1; i<=imax; i++){
 			U[i][0] = U[i][1];	/* set the u-values not at the boundary so that the derivative normal to the boundary is zero */
 			V[i][0] = 0;		/* set zero to v-values exactly at the boundary */
-			K[i][0] = K[i][1];	/* set the k-values not at the boundary so that the derivative normal to the boundary is zero */
-			E[i][0] = E[i][1];	/* set the eps-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[i][0] = K[i][1];	/* homogeneous Neumann */
+			E[i][0] = E[i][1];	/* homogeneous Neumann */
 			}
 		}
 	break;
@@ -108,12 +109,14 @@ void free_slip(
 		for (i=1; i<=imax; i++){
 			U[i][jmax+1] = U[i][jmax];	/* set the u-values not at the boundary so that the derivative normal to the boundary is zero */
 			V[i][jmax]   = 0;		/* set zero to v-values exactly at the boundary */
-			K[i][jmax+1] = K[i][jmax];	/* set the k-values not at the boundary so that the derivative normal to the boundary is zero */
-			E[i][jmax+1] = E[i][jmax];	/* set the eps-values not at the boundary so that the derivative normal to the boundary is zero */
+			K[i][jmax+1] = K[i][jmax];	/* homogeneous Neumann */
+			E[i][jmax+1] = E[i][jmax];	/* homogeneous Neumann */
 			}
+
 		}
 	break;
 	}
+
 }
 
 /**
@@ -168,6 +171,7 @@ void outflow(
 		}
 	break;
 	}
+
 }
 
 /**
@@ -278,15 +282,14 @@ void boundaryvalues(
 					  K[ i ][ j ] 	= 0.00001;
 					  E[ i ][ j ] 	= E[ i+1 ][ j ];
 				  }
+
+
 			}
 }
 
-/**
- * Supposing the three different problems:
- * 	karman = Karman vortex street
- * 	shear  = Plane shear flow
- *	step   = Flow over a step
- * we deal with these problems differently
+
+/* fuction for
+ * INFLOW boundary condition
  */
 void spec_boundary_val( 
   char   *problem, 
@@ -306,23 +309,16 @@ void spec_boundary_val(
 
 		if(dp==0){
 			/* inflow velocity */
-			U[0][j]=1.0;
+			U[0][j]=1.0;			/* normalized inflow velocity */
 			V[0][j]=-V[1][j];		/* setting the average equal to 0 */
 		}else{
 			/* pressure driven flow */			
 			U[0][j]= U[1][j];		/* homogeneous neumann conditions */
-			V[0][j]= V[1][j];
+			V[0][j]= V[1][j];		/* homogeneous neumann conditions */
 		}
 
-		K[0][j] = K[1][j];
-		E[0][j] = E[1][j];
-
-		/*kin = 0.003*SQ(U[0][j]);
-		k[0][j]=2.*kin-k[1][j];
-		eps[0][j]=2.*cn*sqrt(fabs(kin)*SQ(kin))/0.03/ylength-eps[1][j];*/
-
+		K[0][j] = K[1][j];			/* homogeneous neumann conditions */
+		E[0][j] = E[1][j];			/* homogeneous neumann conditions */
 	}
-
-	return;
 }
 

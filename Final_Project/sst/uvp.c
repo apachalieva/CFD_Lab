@@ -62,39 +62,58 @@ inline double duvdy(double **u, double **v, int i, int j, double dy, double alph
 	                       )/dy/4.0;
 }
 
-inline double ddx_fw(double** M, int i, int j, double dx){
+inline double ddx_fw(double** M, double dx, int i, int j){
 	return (M[i+1][j]-M[i][j])/dx;
 }
 
-inline double ddx_bw(double** M, int i, int j, double dx){
+inline double ddx_bw(double** M, double dx, int i, int j){
 	return (M[i][j]-M[i-1][j])/dx;
 }
 
-inline double ddy_fw(double** M, int i, int j, double dy){
+inline double ddy_fw(double** M, double dy, int i, int j){
 	return (M[i][j+1]-M[i][j])/dy;
 }
 
-inline double ddy_bw(double** M, int i, int j, double dy){
+inline double ddy_bw(double** M, double dy, int i, int j){
 	return (M[i][j]-M[i][j-1])/dy;
+}
+
+inline double dUdx_hedge( double **u, double dx, int i, int j ){
+	return ( (u[i][j+1]+u[i][j]) - (u[i-1][j+1]+u[i-1][j]) ) / (2*dx);
+}
+inline double dUdy_hedge( double **u, double dy, int i, int j ){
+	return ( (u[i][j+1]+u[i-1][j+1]) - (u[i][j]+u[i-1][j]) ) / (2*dy);
+}
+inline double dUdy_vedge( double **u, double dy, int i, int j ){
+	return ( u[i][j+1] - u[i][j-1] ) / (2*dy);
+}
+inline double dVdx_hedge( double **v, double dx, int i, int j ){
+	return  (v[i+1][j]-v[i-1][j] ) / (2*dx);
+}
+inline double dVdx_vedge( double **v, double dx, int i, int j ){
+	return ( (v[i][j]+v[i][j-1]) - (v[i-1][j]+v[i-1][j-1])  ) / (2*dx);
+}
+inline double dVdy_vedge( double **v, double dy, int i, int j ){
+	return ( (v[i-1][j]+v[i][j]) - (v[i-1][j-1]+v[i][j-1]) ) / (2*dy);
 }
 
 inline double dkdw(double** K, double** W, int i, int j, double dx, double dy){
 	double dkdx, dkdy, dwdx, dwdy, app1;
 	if(i!=0){
-		dkdx=ddx_bw(K,i,j,dx);
-		dwdx=ddx_bw(W,i,j,dx);
+		dkdx=ddx_bw(K,dx,i,j);
+		dwdx=ddx_bw(W,dx,i,j);
 	}
 	else{
-		dkdx=ddx_fw(K,i,j,dx);
-		dwdx=ddx_fw(W,i,j,dx);
+		dkdx=ddx_fw(K,dx,i,j);
+		dwdx=ddx_fw(W,dx,i,j);
 	}
 	if(j!=0){
-		dkdy=ddy_bw(K,i,j,dy);
-		dwdy=ddy_bw(W,i,j,dy);
+		dkdy=ddy_bw(K,dy,i,j);
+		dwdy=ddy_bw(W,dy,i,j);
 	}
 	else{
-		dkdy=ddy_fw(K,i,j,dy);
-		dwdy=ddy_fw(W,i,j,dy);
+		dkdy=ddy_fw(K,dy,i,j);
+		dwdy=ddy_fw(W,dy,i,j);
 	}
 	app1 = dkdx*dwdx+dkdy*dwdy;
 	return app1;
@@ -136,7 +155,7 @@ inline double S_funct(int i, int j, double **U, double **V, double dx, double dy
 	else{
 		dvdx=(V[i+1][j]-V[i][j])/dx;
 	}
-	if (i!=0){
+	if (j!=0){
 		dudy=(U[i][j]-U[i][j-1])/dy;
 	}
 	else{
@@ -237,8 +256,6 @@ inline double dvisct_dx( double **k, double **e, double** U, double** V, double 
 	}
 	app3=app3/SQ(dx);
 
-	/*printf("KA---- %d %d: %f %f %f %f %f %f %f \n", i, j, c1, c2, c3, k[i+1][j], k[i][j], k[i][j], k[i-1][j] );*/
-
 	return app3;
 }
 
@@ -255,8 +272,6 @@ inline double dvisct_dy( double **k, double **e, double** U, double** V, double 
 		app3 = app1 * (e[i][j+1]-e[i][j]) - app2 * (e[i][j]-e[i][j-1]);
 	}
 	app3=app3/SQ(dy);
-
-	/*printf("KA---- %f %f %f \n", c1, c2, c3 );*/
 
 	return app3;
 }
@@ -315,6 +330,9 @@ inline double Beta(double** K, double** W, double** delta, double nu,int i, int 
 	return app2;
 }
 
+/**
+ * Calculation of F and G
+ */
 void calculate_fg(
   double Re,
   double GX,
@@ -396,8 +414,7 @@ void calculate_fg(
 	/* inner values */
 	for(i=1; i<=imax-1; i++)
 		for(j=1; j<=jmax; j++)
-			if(Flag[i][j]==C_F && Flag[i+1][j]==C_F){
-
+			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i+1][j]) )
 				F[i][j] = U[i][j] + dt * (
 						2.0 * dndudxdx(K, E, nu, delta, U, V, i, j, dx, dy)
 						+ dndudypdvdxdy(K, E, nu, delta, U, V, i, j, dx, dy)
@@ -405,11 +422,11 @@ void calculate_fg(
 						- duvdy(U,V,i,j,dy, alpha)
 						+ GX
 						);
-			}
+
 
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax-1; j++)
-			if(Flag[i][j]==C_F && Flag[i][j+1]==C_F){
+			if( IS_FLUID(Flag[i][j]) && IS_FLUID(Flag[i][j+1]) )
 				G[i][j] = V[i][j] + dt * (
 						dndudypdvdxdx(K, E, nu, delta, U, V, i, j, dx, dy)
 						+ 2.0 * dndvdydy(K, E, nu, delta, U, V, i, j, dx, dy)
@@ -417,21 +434,22 @@ void calculate_fg(
 						- dv2dy(V, i, j, dy, alpha)
 						+ GY
 						);
-			}
 
 }
 
-
+/**
+ * Calculation of the right-hand side of the pressure equation
+ */
 void calculate_rs(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **F,
   double **G,
   double **RS,
-  int **Flag
+  int    **Flag
 ){
 	int i,j;
 
@@ -441,31 +459,9 @@ void calculate_rs(
 
 }
 
-
-
-
-void calculate_dt(
-  double Re,
-  double tau,
-  double *dt,
-  double dx,
-  double dy,
-  int imax,
-  int jmax,
-  double **U,
-  double **V
-){
-
-
-	*dt = tau * fmin(
-					fmin(Re/2/(1/(dx*dx) + 1/(dy*dy)) ,
-							dx/fmatrix_max(U,0,imax+1,0,jmax+1) 	),
-								dy/fmatrix_max(V,0,imax+1,0,jmax+1)
-							);
-
-}
-
-
+/**
+ * Calculation of the u and v values
+ */
 void calculate_uv(
   double dt,
   double dx,
@@ -518,21 +514,10 @@ void comp_KAW(
 ){
 	int i, j;
 	
+	/* Calculation of the k - turbulent kinetic energy */
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			if(IS_FLUID(Flag[i][j])	) {
-
-				/*printf("KA-- %d %d: %f %f %f %f %f %f %f %f %f %f \n", i,j,KA[i][j], dt,	dvisct_dx( KA, EP, nu, cn, delta, dx, i, j )
-									, dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )
-								    ,dUkedx( U, KA, dx, alpha, i, j )
-								    , dVkedy( V, KA, dy, alpha, i, j )
-							        , visc_t( KA, EP, nu, cn, delta, i, j )
-							         ,gradU( U, V, dx, dy, i, j )
-							         , EP[i][j]
-							         , KA[i][j] + dt*( dvisct_dx( KA, EP, nu, cn, delta, dx, i, j ) + dvisct_dy( KA, EP, nu, cn, delta, dy, i, j )- dUkedx( U, KA, dx, alpha, i, j )- dVkedy( V, KA, dy, alpha, i, j ) + 0.5 * visc_t( KA, EP, nu, cn, delta, i, j )* gradU( U, V, dx, dy, i, j )- EP[i][j]));
-							         */
-
-
+			if(IS_FLUID(Flag[i][j])	)
 				KA[i][j] = KA[i][j] + dt*(
 						- dUkedx( U, KA, dx, alpha, i, j )
 						- dVkedy( V, KA, dy, alpha, i, j )
@@ -542,59 +527,9 @@ void comp_KAW(
 					    + P_tilda_k( KA, W, U, V, delta, nu, dx, dy, i, j)
 				       );
 
-				/*printf("EP-- %d %d --> %f %f %f %f %f %f %f %f %f %f \n",i,j,EP[i][j] , dt
-						  ,d_fnu_visctEP_dx( KA, EP, nu, cn, delta, dx, i, j )
-		                , d_fnu_visctEP_dy( KA, EP, nu, cn, delta, dy, i, j )
-		                , dUkedx( U, EP, dx, alpha, i, j )
-		                , dVkedy( V, EP, dy, alpha, i, j )
-		                , ((c1*f1(KA, EP, nu, delta, i, j))/2),
-		                KA[i][j],
-		                gradU(U, V, dx, dy, i, j)
-		                , c2*f2( KA, EP, nu, delta, i, j )
-				);*/
-			}
-/*
-	for (i=0;i<=imax+1; i++){
-						printf("K[ %d ] --> ",i);
-						for(j=0;j<=jmax+1; j++){
-							printf("%f ",KA[i][j]);
-							fflush(stdout);
-						}
-
-						printf("\n");
-					}
-					printf("\n");
-*/
 	for(i=1; i<=imax; i++)
 		for(j=1; j<=jmax; j++)
-			if(IS_FLUID(Flag[i][j])	) {
-				/*
-				printf("W-- %d %d --> %f %f %f %f %f %f %f %f %f K: %f %f %f %f %f %f %f\n",i,j,
-																							 W[i][j] ,
-																							 dt,
-																							 dUkedx( U, W, dx, alpha, i, j),
-																			                 dVkedy( V, W, dy, alpha, i, j),
-																			                 Alpha( KA, W, delta, nu, i, j, dx, dy), visc_t( KA, W, U, V, nu, delta, i, j, dx, dy),P_tilda_k( KA, W, U, V, delta, nu, dx, dy, i, j),
-																			                 Beta( KA, W, delta, nu, i, j, dx, dy) * SQ(W[i][j]),
-																			                 dvisct_dx( KA, W, U, V, nu, delta, dx, dy, i, j, 0),
-																			                 dvisct_dy( KA, W, U, V, nu, delta, dx, dy, i, j, 0),
-																							 2.0*(1.0-f1( KA, W, delta, nu, i, j, dx, dy) ) * sigma_w2 / W[i][j]*dkdw( KA, W, i, j, dx, dy),
-																							 KA[i][j-1],KA[i][j], KA[i][j],
-																							 W[i][j] + dt*(
-																							 													- dUkedx( U, W, dx, alpha, i, j)
-																							 									                - dVkedy( V, W, dy, alpha, i, j)
-																							 									                + Alpha( KA, W, delta, nu, i, j, dx, dy)
-																							 									                * (P_tilda_k( KA, W, U, V, delta, nu, dx, dy, i, j)/ visc_t( KA, W, U, V, nu, delta, i, j, dx, dy))
-																							 									                - Beta( KA, W, delta, nu, i, j, dx, dy) * SQ(W[i][j])
-																							 									                + dvisct_dx( KA, W, U, V, nu, delta, dx, dy, i, j, 0)
-																							 													+ dvisct_dy( KA, W, U, V, nu, delta, dx, dy, i, j, 0)
-																							 													+ 2.0*(1.0-f1( KA, W, delta, nu, i, j, dx, dy) ) * sigma_w2 / W[i][j]
-																							 													* dkdw( KA, W, i, j, dx, dy)
-																							 											),
-																							 											Alpha( KA, W, delta, nu, i, j, dx, dy)* (P_tilda_k( KA, W, U, V, delta, nu, dx, dy, i, j)/ visc_t( KA, W, U, V, nu, delta, i, j, dx, dy))
-												);
-				printf("visc_t --> %f, %f, %f %f\n",KA[i][j], a1*W[i][j], S_funct( i, j, U, V, dx, dy) ,f2( KA, W, delta, nu, i, j, dx, dy) );
-				*/
+			if(IS_FLUID(Flag[i][j])	) 
 				W[i][j] = W[i][j] + dt*(
 													- dUkedx( U, W, dx, alpha, i, j)
 									                - dVkedy( V, W, dy, alpha, i, j)
@@ -606,7 +541,63 @@ void comp_KAW(
 													+ 2.0*(1.0-f1( KA, W, delta, nu, i, j, dx, dy) ) * sigma_w2 / W[i][j]
 													* dkdw( KA, W, i, j, dx, dy)
 											);
+}
+
+
+
+
+
+void comp_surface_force(
+  double Re,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U,
+  double **V,
+  double **P,
+  int **Flag,
+  double *Fu,
+  double *Fv
+){
+
+	int i,j;
+	double pmin;
+
+	*Fu=.0;
+	*Fv=.0;
+
+	pmin = P[1][1];
+	for(i=1; i<=imax; i++)
+		for(j=1; j<=jmax; j++)
+			pmin = MIN(pmin, P[i][j]);
+
+	for(i=1; i<=imax; i++)
+		for(j=1; j<=jmax; j++)
+			if(IS_BOUNDARY(Flag[i][j])	) {
+
+				  
+				  if( ( Flag[ i ][ j ] & B_N ) == B_N ){
+					  *Fu += dx*(dUdy_hedge(U, dy, i, j) + dVdx_hedge(V,dx,i,j)) / Re;
+					  *Fv += dx*( (2.0* ddy_bw(V,dy,i,j+1)) /Re - (P[i][j+1]-pmin) );
+				  }
+				
+				  if( ( Flag[ i ][ j ] & B_S ) == B_S ) {
+					  *Fu += -dx*(dUdy_hedge(U, dy, i, j-1) + dVdx_hedge(V,dx,i,j-1)) / Re;
+					  *Fv += -dx*( (2.0* ddy_bw(V,dy,i,j-1)) /Re  - (P[i][j-1]-pmin) );
+				  } 	
+				 
+				  if( ( Flag[ i ][ j ] & B_W ) == B_W ){
+					  *Fu += -dy*( (2.0 * ddx_bw(U, dx, i-1, j)) / Re - (P[i-1][j]-pmin) );
+					  *Fv += -dy*(dVdx_vedge(V, dx, i, j) + dUdy_vedge(U, dy, i-1, j)) /Re;
+				  }
+				  
+				  if( ( Flag[ i ][ j ] & B_E ) == B_E ){
+					  *Fu += dy*( (2.0 * ddx_bw(U, dx, i+1, j)) / Re - (P[i+1][j]-pmin) );
+					  *Fv += dy*(dVdx_vedge(V, dx, i+1, j) + dUdy_vedge(U, dy, i, j)) /Re;
+				  }
 
 			}
+
 }
 

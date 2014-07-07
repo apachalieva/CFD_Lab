@@ -1,5 +1,5 @@
 CC = icc
-CFLAGS = -Wall -pedantic -Werror -O3 -xHost
+CFLAGS = -Wall -pedantic -Werror -O3 -xHost -fast
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\

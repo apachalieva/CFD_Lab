@@ -55,22 +55,22 @@ int read_parameters( const char *szFileName,       /* name of the file */
                     int  *jmax,                /* number of cells y-direction*/
                     double *alpha,             /* uppwind differencing factor*/
                     double *omg,               /* relaxation factor */
-                    double *tau,               /* safety factor for time step*/
                     int  *itermax,             /* max. number of iterations  */
 		                               /* for pressure per time step */
                     double *eps,               /* accuracy bound for pressure*/
-                    double *dt_value,           /* time for output */
-                    int *b, 			/* vector for boundaries */
+                    int *boundrs, 		/* vector for boundaries */
                     double *dp,			/* dp/dx gradient of pressure */
-                    int *p,
-        		    double *KI,	/* kinetic energy intial value */
-        		    double *EI,	/* dissipation rate initial value */
+                    int *p,			/* specification of the problem */
+        		    double *K,	/* kinetic energy intial value */
+        		    double *W,	/* dissipation rate initial value */
         		    double *cn,	/* turbolent eddy viscosity */
         		    double *ce,	/* turbolent modelling constants */
-        		    double *c1,/* turbolent modelling constants */
-        		    double *c2,/* turbolent modelling constants */
-        		    char *pgm
-);			/* specification of the problem */
+					double *c1,		       /* turbolent modelling constants */
+					double *c2,		       /* turbolent modelling constants */
+					char   *pgm,		       /* specification of the problem  */
+					double *nu,			/* viscosity */
+					char *problem	/* specification of the problem 	*/
+);
 
 /**
  * The arrays U,V and P are initialized to the constant values UI, VI and PI on
@@ -82,18 +82,28 @@ void init_uvp(
   double PI,
   double KI,
   double EI,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **U,
   double **V,
   double **P,
   double **K,
   double **E,
-  int** Flagfield,
-  char* problem
+  int    **Flagfield,
+  char   *problem
 );
 
-void init_flag( const char *problem, const int imax, const int jmax, int *fluid_cells, int **Flag );
+/** 
+ * Initialize the flagfield regarding the problem chosen. 
+ */
+void init_flag( 
+ const char *folder, 
+ const char *problem, 
+ const int  imax, 
+ const int  jmax, 
+ int        *fluid_cells, 
+ int        **Flag 
+);
 
 void init_delta( int **Flag, double** delta, int imax, int jmax, double dx, double dy);
 

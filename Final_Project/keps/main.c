@@ -8,8 +8,8 @@
 #include <string.h>
 #include <math.h>
 
-#define PARAMF "shear.dat"
-#define VISUAF "visual/sim_"
+#define VISUA_FOLDER "./visual/"
+#define CONFIGS_FOLDER "./../configs/"
 
 /**
  * The main operation reads the configuration file, initializes the scenario and
@@ -53,22 +53,26 @@ int main(int argc, char** args){
 	double **K, **E;					/* turbulent kinetic energy k, dissipation rate epsilon*/
 	double Fu, Fv;						/* force integration variables */
 	double KI, EI, cn, ce, c1, c2; 			/* K and E: Initial values for k and epsilon */
-	int n, it, imax, jmax, itermax, pb;
-	
+
+	int n, it, imax, jmax, itermax, pb, boundaries[4];
 	int fluid_cells;		/* Number of fluid cells in our geometry */
-	int boundaries[4];
 	int **Flag;			/* Flagflield matrix */
 	
-	char vtkname[100];
-	char pgm[50];
+	char vtkname[200];
+	char pgm[200];
 	char problem[10];		/* Problem name */
-	char *fname;
+	char fname[200];
 
-	if(argc>=2) 	fname=args[1];
-	else 			fname = PARAMF;
+	if(argc<2){
+		printf("No parameter file specified. Terminating...\n");
+		exit(1);
+	}
 
-	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &itermax, &eps, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2, pgm, &nu, &KI, &EI, problem);
+	sprintf(fname, "%s%s", CONFIGS_FOLDER, args[1]);
+	printf("%s\n",fname);
+	read_parameters(fname, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &itermax, &eps, boundaries, &dp, &pb, &KI, &EI, &cn, &ce, &c1, &c2, pgm, &nu, problem);
 
+	/* Allocate Flag matrix */
 	Flag = imatrix( 0, imax+1, 0, jmax+1 );
 
 	U = matrix ( 0 , imax+1 , 0 , jmax+1 );
@@ -83,8 +87,8 @@ int main(int argc, char** args){
 	E = matrix ( 0 , imax+1 , 0 , jmax+1 );
 	
 	/* Initialize values to the Flag, u, v and p */
-	init_flag( pgm, imax, jmax, &fluid_cells, Flag );
-	init_uvp( UI, VI, PI, KI, EI, imax, jmax, U, V, P, K, E, Flag, problem );
+	init_flag(CONFIGS_FOLDER,pgm, imax, jmax, &fluid_cells, Flag );
+	init_uvp(UI, VI, PI, KI, EI, imax, jmax, U, V, P, K, E, Flag, problem );
 
 	printf("Problem: %s\n", problem );
 	printf( "xlength = %f, ylength = %f\n", xlength, ylength );
@@ -97,14 +101,14 @@ int main(int argc, char** args){
 	n=0;
 
 	while( t <= t_end ){
-	  
 		boundaryvalues( imax, jmax, U, V, K, E, boundaries, Flag );
 
 		/* special inflow boundaries, including k and eps */
 		spec_boundary_val( problem, imax, jmax, U, V, K, E, Re, dp, cn, ylength);
-		
+
 		/* calculate new values for k and eps */
 		comp_KAEP(Re, nu, cn, ce, c1, c2, alpha, dt, dx, dy, imax, jmax, U, V, K, E, GX, GY, Flag);
+
 
 		/* calculate new values for F and G */
 		calculate_fg( Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, K, E, nu, cn, Flag );
@@ -128,8 +132,9 @@ int main(int argc, char** args){
 		n++;
 	}
 
-	sprintf(vtkname, "%s%s", VISUAF, fname);
+	sprintf(vtkname, "%s%s", VISUA_FOLDER,  args[1]);
 	write_vtkFile( vtkname, 1, xlength, ylength, imax, jmax, dx, dy, U, V, P, K, E, Flag);
+	
 	comp_surface_force( Re, dx, dy, imax, jmax, U, V, P, Flag, &Fu, &Fv);
 
 	printf( "\nProblem: %s\n", problem );

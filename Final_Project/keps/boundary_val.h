@@ -16,9 +16,9 @@ void boundaryvalues(
   int    **Flag		/* Flag field, describing the geometry of the problem */
 );
 
-/** 
- * Specify different boubdary conditions 
- * depending on the problem
+
+/* fuction for
+ * INFLOW boundary condition
  */
 void spec_boundary_val( 
   char  *problem, 

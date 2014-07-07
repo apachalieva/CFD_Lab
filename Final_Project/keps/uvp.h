@@ -43,6 +43,9 @@ void calculate_fg(
 		  int    **Flag
 );
 
+
+
+
 /**
  * This operation computes the right hand side of the pressure poisson equation.
  * The right hand side is computed according to the formula
@@ -61,6 +64,7 @@ void calculate_rs(
   double **RS,
   int    **Flag
 );
+
 
 /**
  * Determines the maximal time step size. The time step size is restricted
@@ -81,6 +85,7 @@ void calculate_dt(
   double **U,
   double **V
 );
+
 
 /**
  * Calculates the new velocity values according to the formula
@@ -134,6 +139,7 @@ void comp_KAEP(
   int    **Flag 
 );
 
+
 void comp_surface_force(
   double Re,
   double dx,
@@ -147,4 +153,7 @@ void comp_surface_force(
   double *Fu,
   double *Fv
 );
+
+
+
 #endif

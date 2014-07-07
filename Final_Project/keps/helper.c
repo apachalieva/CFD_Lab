@@ -41,17 +41,6 @@ double fmatrix_max(double ** m, int nrl, int nrh, int ncl, int nch){
 	return max;
 }
 
-double fmatrix_min(double ** m, int nrl, int nrh, int ncl, int nch){
-	int i,j;
-
-	double min = m[nrl][ncl];
-	for(i=nrl; i<=nrh; i++)
-		for(j=ncl; j<=nch; j++)
-			if ( m[i][j] < min )
-				min = m[i][j];
-	return min;
-}
-
 /* ----------------------------------------------------------------------- */
 /*                         local auxiliary functions                       */
 /* ----------------------------------------------------------------------- */

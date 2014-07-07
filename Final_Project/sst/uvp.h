@@ -69,12 +69,12 @@ void calculate_rs(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **F,
   double **G,
   double **RS,
-  int **Flag
+  int    **Flag
 );
 
 
@@ -92,8 +92,8 @@ void calculate_dt(
   double *dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **U,
   double **V
 );
@@ -116,14 +116,14 @@ void calculate_uv(
   double dt,
   double dx,
   double dy,
-  int imax,
-  int jmax,
+  int    imax,
+  int    jmax,
   double **U,
   double **V,
   double **F,
   double **G,
   double **P,
-  int **Flag
+  int    **Flag
 );
 
 
@@ -147,6 +147,21 @@ void comp_KAW(
   double GY,
   double** delta,
   int **Flag
+);
+
+
+void comp_surface_force(
+  double Re,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U,
+  double **V,
+  double **P,
+  int **Flag,
+  double *Fu,
+  double *Fv
 );
 
 

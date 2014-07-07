@@ -15,14 +15,27 @@ void boundaryvalues(
   double **K,
   double **W,
   double nu,
-  int *b,
-  int **Flag );
+  int    *boundrs,	/* vector representing different types of boundaries */
+  int    **Flag		/* Flag field, describing the geometry of the problem */
+);
 
 
 /* fuction for
  * INFLOW boundary condition
  */
-void spec_boundary_val( char* problem, int imax, int jmax,double **U, double **V, double **K, double **E, double Re, double dp, double cn, double ylength);
+void spec_boundary_val( 
+  char  *problem, 
+  int    imax, 
+  int    jmax,
+  double **U, 
+  double **V, 
+  double **K, 
+  double **E, 
+  double Re, 
+  double dp, 
+  double cn, 
+  double ylength
+);
 
 #endif
 

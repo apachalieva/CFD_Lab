@@ -1,7 +1,6 @@
 #include "helper.h"
 #include "init.h"
 
-
 int read_parameters( const char *szFileName,   /* name of the file 		*/
                     double *Re,                /* reynolds number   		*/
                     double *UI,                /* velocity x-direction 		*/
@@ -31,11 +30,9 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
         	    double *ce,		       /* turbolent modelling constants */
         	    double *c1,		       /* turbolent modelling constants */
         	    double *c2,		       /* turbolent modelling constants */
-		    char   *pgm,		       /* specification of the problem  */
-		double *nu,			/* viscosity */
-		double *KI,			/* initial value for kinetic energy */
-		double *EI,			/* intial value for dissipation rate */
-		char *problem
+				char   *pgm,		       /* specification of the problem  */
+				double *nu,			/* viscosity */
+				char *problem
 )
 {
    int *wl,*wb,*wr,*wt;
@@ -60,9 +57,6 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
    READ_DOUBLE( szFileName, *GX );
    READ_DOUBLE( szFileName, *GY );
    READ_DOUBLE( szFileName, *PI );
-
-   READ_DOUBLE( szFileName, *K );
-   READ_DOUBLE( szFileName, *E );
 
    READ_DOUBLE( szFileName, *cn );
    READ_DOUBLE( szFileName, *ce );
@@ -90,8 +84,8 @@ int read_parameters( const char *szFileName,   /* name of the file 		*/
 	/* compute viscosity */
 	*nu=1.0 / *Re;
 	/* compute initial values for kinetic energy and dissipation rate from initial velocity */
-	*KI = 0.003 * SQ(*UI);
-	*EI = sqrt(*KI*SQ(*KI)) * *cn / 0.03 / *ylength;
+	*K = 0.003 * SQ(*UI);
+	*E = sqrt(*K*SQ(*K)) * *cn / 0.03 / *ylength;
 
 	/* setting of the problem */
 	switch (*p){
@@ -156,8 +150,9 @@ void init_uvp(
  * B_NE	:	Boundary cell with North-Eastern fluid cell
  * B_NW	:	Boundary cell with North-Western fluid cell
  */
-void init_flag( 
-  const char *problem, 
+void init_flag(
+  const char *folder,
+  const char *pgm, 
   const int  imax, 
   const int  jmax, 
   int        *fluid_cells, 
@@ -170,9 +165,9 @@ void init_flag(
 	int i, j;
 	
 	*fluid_cells=0;
-	if (strcmp(problem, "none") != 0){
-		snprintf( filename, sizeof filename, "%s%s", problem, ext );
-		printf("reading geometry file '%s'\n", filename);
+	if (strcmp(pgm, "none") != 0){
+		snprintf( filename, sizeof filename, "%s%s%s", folder, pgm, ext );
+		printf("Reading geometry file '%s'\n", filename);
 		buffer = read_pgm( filename );
 
 		for( i = 0; i <= imax+1; i++ )
@@ -190,6 +185,7 @@ void init_flag(
 				Flag[i][j] = C_F;
 				(*fluid_cells)++;
 			}
+
 			Flag[i][jmax+1] = C_B;
 		}
 
@@ -211,6 +207,7 @@ void init_flag(
 		    if( Flag[i][j+1] == C_F )
 		    	Flag[i][j] |= B_N;
 
+
 		    /* Forbidden cells */
 		    if( ( Flag[i][j] & ( B_E | B_W ) ) == ( B_E | B_W ) || 
 			( Flag[i][j] & ( B_S | B_N ) ) == ( B_S | B_N ) ){
@@ -220,4 +217,61 @@ void init_flag(
 		}
 	    }
 	}
+}
+
+void init_delta( int **Flag, double** delta, int imax, int jmax, double dx, double dy){
+	int y1,y2,x1,x2, i, j, k, l;
+	double fx,fy;
+
+	for(i=0; i<=imax+1; i++)
+		for( j=0; j<=jmax+1; j++){
+
+			x1=-1; x2=-1; y1=-1; y2=-1;
+
+			if(Flag[i][j]==C_F){
+
+				for( k=i+1; k<=imax+1 && x1<0; k++)
+					if(Flag[k][j]!=C_F)
+						x1=k-i;
+				if(x1<0)
+					x1=imax+1-i;
+
+				for( k=i-1; k>=0 && x2<0; k--)
+					if(Flag[k][j]!=C_F)
+						x2=i-k;
+				if(x2<0)
+						x2=i;
+
+				for( l=j+1; j<=jmax+1 && y1<0; l++)
+					if(Flag[i][l]!=C_F)
+						y1=l-j;
+				if(y1<0)
+						y1=jmax+1-j;
+
+				for( l=j-1; j>=0 && y2<0; l--)
+					if(Flag[i][l]!=C_F)
+						y2=j-l;
+				if(y2<0)
+						y2=j;
+
+				x1=fmin(x1,x2);
+				y1=fmin(y1,y2);
+				fx=(x1)*dx;
+				fy=(y1)*dy;
+
+				delta[i][j]=fmin(fx,fy);
+
+			}
+			else{
+				if (i==0 || i==imax+1){
+					delta[i][j]=0.1*dx;
+				}
+				else{
+					if(j==0 || j==jmax+1)
+						delta[i][j]=0.1*dy;
+					else
+						delta[i][j]=0.05*(dx+dy);
+				}
+			}
+		}
 }

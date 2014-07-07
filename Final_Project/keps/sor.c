@@ -27,8 +27,10 @@ void sor(
   for(i = 1; i <= imax; i++) {
       for(j = 1; j<=jmax; j++) {
 		  /* SOR computation limited to the fluid cells ( C_F - fluid cell )*/
+
 			if ( IS_FLUID(Flag[ i ][ j ]) )
 				P[i][j] =  (1.0-omg)*P[i][j] + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
+
       }
   }
 
@@ -53,7 +55,6 @@ void sor(
  	P[i][jmax+1] = P[i][jmax];
    }
 
-/* if (strcmp(problem,"shear")==0 || strcmp(problem,"karman")==0|| strcmp(problem,"step")==0){*/ 
    if (dp!=0){
  	/* pressure differece driven flow */
  	for (j=1; j<=jmax; j++){
@@ -108,6 +109,7 @@ void sor(
  		if( ( Flag[ i ][ j ] & B_E ) == B_E ){
  		    P[ i ][ j ] = P[ i+1 ][ j ];
  		}
+
  	    }
  	}
      }
